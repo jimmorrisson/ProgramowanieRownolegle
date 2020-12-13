@@ -1,4 +1,2 @@
 /build/*
 /.vscode/
-/libs/eigen/
-/libs/LBFGSpp/
