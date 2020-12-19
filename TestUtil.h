@@ -1,37 +1,52 @@
 #include <chrono>
 #include <LBFGS.h>
 #include "IFunction.h"
+#include "BFGSolver.h"
 
 class TestUtil
 {
 private:
-	LBFGSParam<double> param;
-public:
-	TestUtil(double epsilon, int max_iterations, LINE_SEARCH_TERMINATION_CONDITION condition)
+	double epsilon;
+	int max_iterations;
+	bool useLBFGSLib;
+
+	int solveLBFGSLib(IFunction& func, VectorXd& initialVector, double& fx)
 	{
-		// Set up parameters
+		// Create solver and function object
+		LBFGSParam<double> param;
 		param.epsilon = epsilon;
 		param.max_iterations = max_iterations;
-		param.linesearch = condition;
+		param.linesearch = LBFGS_LINESEARCH_BACKTRACKING_ARMIJO;
+		LBFGSSolver<double, LineSearchBracketing> solver(param);
+		
+		return solver.minimize(func, initialVector, fx);
 	}
 
-	void runTest(IFunction &func) 
+	int solveBFGSImpl(IFunction& func, VectorXd& initialVector, double& fx)
+	{
+		BFGSolver solver(epsilon, max_iterations);
+		return solver.solve(func, initialVector, fx);
+	}
+
+public:
+	TestUtil(double epsilon, int max_iterations, bool useLBFGSLib) : 
+		epsilon(epsilon), max_iterations(max_iterations), useLBFGSLib(useLBFGSLib) {}
+
+	void runTest(IFunction& func)
 	{
 		std::cout << "<--------------STARTING TEST-------------->" << std::endl;
 		std::cout << func;
 
-		// Create solver and function object
-		LBFGSSolver<double, LineSearchBracketing> solver(param);
-		
+		VectorXd initialVector = func.getInitialVector();
 		double fx;
 
 		// Running test
 		auto t1 = std::chrono::high_resolution_clock::now();
-		int niter = solver.minimize(func, func.initialVector, fx);
+		int iterationNumber = useLBFGSLib ? solveLBFGSLib(func, initialVector, fx) : solveBFGSImpl(func, initialVector, fx);
 		auto t2 = std::chrono::high_resolution_clock::now();
 		
-		std::cout << niter << " iterations" << std::endl;
-		std::cout << "x = \n" << func.initialVector.transpose() << std::endl;
+		std::cout << iterationNumber << " iterations" << std::endl;
+		std::cout << "x = \n" << initialVector.format(Eigen::IOFormat(Eigen::FullPrecision, 0, " ", ", ", "", "")) << std::endl;
 		std::cout << "f(x) = " << fx << std::endl;
 		std::cout << "Execution time: " 
 			<< std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count() 

@@ -6,7 +6,7 @@ include_directories(libs/eigen/)
 
 set(SOURCES
     main.cpp
- "ExtendedRosenbrockFunction.h" "IFunction.h" "TestUtil.h" "LBFGSExampleRosenbrock.h" "QuadraticFunction.h" "PowerSingularFunction.h")
+ "ExtendedRosenbrockFunction.h" "IFunction.h" "TestUtil.h" "LBFGSExampleRosenbrock.h" "QuadraticFunction.h" "PowerSingularFunction.h" "BFGSolver.h")
 
 add_subdirectory(libs/eigen/)
 # add_executable(ExampleQuadratic libs/LBFGSpp/example_quadratic.cpp)

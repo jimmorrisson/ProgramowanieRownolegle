@@ -8,7 +8,7 @@
 
 int main()
 {
-    TestUtil testUtil(1e-6, 100, LBFGS_LINESEARCH_BACKTRACKING_ARMIJO);
+    TestUtil testUtil(1e-6, 100, true);
 
     testUtil.runTest(LBFGSExampleRosenbrock(60));
     testUtil.runTest(ExtendedRosenbrockFunction(60));
