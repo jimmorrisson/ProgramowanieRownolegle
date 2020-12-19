@@ -2,19 +2,20 @@
 #include <iostream>
 #include <iomanip>
 #include <Eigen/Core>
+#include <Eigen/Dense>
 using Eigen::VectorXd;
+using Eigen::MatrixXd;
 using namespace LBFGSpp;
 
 class IFunction
 {
 protected:
-	const int size;
-
 	VectorXd initialVector;
 
 	IFunction(int size, VectorXd initialVector) : size(size), initialVector(initialVector) {}
 
 public:
+	const int size;
 
 	VectorXd getInitialVector()
 	{

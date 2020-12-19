@@ -8,11 +8,19 @@
 
 int main()
 {
-    TestUtil testUtil(1e-6, 100, true);
+    TestUtil testUtilLib(1e-6, 1000, true);
+    TestUtil testUtilAlg(1e-6, 1000, false);
 
-    testUtil.runTest(LBFGSExampleRosenbrock(60));
-    testUtil.runTest(ExtendedRosenbrockFunction(60));
-    testUtil.runTest(QuadraticFunction(60));
-    testUtil.runTest(PowerSingularFunction(60));
+    testUtilLib.runTest(LBFGSExampleRosenbrock(60));
+    testUtilAlg.runTest(LBFGSExampleRosenbrock(60));
+    
+    testUtilLib.runTest(ExtendedRosenbrockFunction(60));
+    testUtilAlg.runTest(ExtendedRosenbrockFunction(60));
+
+    testUtilLib.runTest(QuadraticFunction(60));
+    testUtilAlg.runTest(QuadraticFunction(60));
+
+    testUtilLib.runTest(PowerSingularFunction(60));
+    testUtilAlg.runTest(PowerSingularFunction(60));
     return 0;
 }
