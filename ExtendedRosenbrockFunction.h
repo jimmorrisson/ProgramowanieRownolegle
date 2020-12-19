@@ -1,3 +1,4 @@
+#pragma once
 #include "IFunction.h"
 
 class ExtendedRosenbrockFunction : public IFunction

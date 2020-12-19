@@ -5,20 +5,22 @@ include_directories(libs/LBFGSpp/include)
 include_directories(libs/eigen/)
 
 set (CMAKE_CXX_STANDARD 17)
+add_compile_options(-Wall)
 find_package(OpenMP REQUIRED)
 
-set(HEADERS
-    ExtendedRosenbrockFunction.h  
-    IFunction.h
-    TestUtil.h
-    LBFGSExampleRosenbrock.h
-    QuadraticFunction.h
-    PowerSingularFunction.h
-    BFGSolver.h
-    )
+file(GLOB_RECURSE LIBS_DIR "libs/*.c" "libs/*.h" "libs/*.cpp" "libs/*.hpp")
+
+set_source_files_properties(
+  ${LIBS_DIR}
+  PROPERTIES
+  COMPILE_FLAGS ""
+)
 
 set(SOURCES
     main.cpp
+    BFGSolver.cpp
+    IFunction.cpp
+    PowerSingularFunction.cpp
     )
 
 add_subdirectory(libs/eigen/)

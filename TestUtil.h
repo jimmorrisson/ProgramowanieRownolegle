@@ -1,3 +1,4 @@
+#pragma once
 #include <chrono>
 #include <LBFGS.h>
 #include "IFunction.h"
