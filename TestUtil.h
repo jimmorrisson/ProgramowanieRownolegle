@@ -36,7 +36,7 @@ public:
 	void runTest(IFunction& func)
 	{
 		std::cout << "<--------------STARTING TEST-------------->" << std::endl;
-		std::cout << func;
+		// std::cout << func;
 
 		VectorXd initialVector = func.getInitialVector();
 		double fx;
@@ -47,8 +47,8 @@ public:
 		auto t2 = std::chrono::high_resolution_clock::now();
 		
 		std::cout << iterationNumber << " iterations" << std::endl;
-		std::cout << "x = \n" << initialVector.format(Eigen::IOFormat(Eigen::FullPrecision, 0, " ", ", ", "", "")) << std::endl;
-		std::cout << "f(x) = " << fx << std::endl;
+		// std::cout << "x = \n" << initialVector.format(Eigen::IOFormat(Eigen::FullPrecision, 0, " ", ", ", "", "")) << std::endl;
+		// std::cout << "f(x) = " << fx << std::endl;
 		std::cout << "Execution time: " 
 			<< std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count() 
 			<< " ms" << std::endl;

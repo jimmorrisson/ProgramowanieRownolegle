@@ -1,7 +1,7 @@
 #include "IFunction.h"
 #include <iostream>
 
-IFunction::IFunction(int size, VectorXd initialVector) : size(size), initialVector(initialVector) 
+IFunction::IFunction(int size, VectorXd initialVector) : initialVector(initialVector), size(size)
 {
 }
 

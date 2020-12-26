@@ -11,7 +11,8 @@ private:
 	
 	double ArmijoBackTrack(IFunction& func, 
 		double fXk, Eigen::VectorXd& Xk, Eigen::VectorXd& gradXk, 
-		Eigen::VectorXd& Dk, Eigen::VectorXd& Xk1, Eigen::VectorXd& gradXk1, double alpha, double alphaCoeff, double delta) const;
+		Eigen::VectorXd& Dk, Eigen::VectorXd& Xk1, Eigen::VectorXd& gradXk1, double &&alpha, 
+		const double alphaCoeff, const double delta) const;
 public:
 	BFGSolver(double epsilon, int max_iterations);
 

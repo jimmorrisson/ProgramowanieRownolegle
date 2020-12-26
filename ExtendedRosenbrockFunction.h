@@ -23,13 +23,17 @@ public:
     double operator()(const VectorXd& x, VectorXd& grad)
     {
         double fx = 0.0;
+        #pragma omp parallel for
         for (int i = 1; i < size; i += 2)
         {
             double a = x[i];
             double b = x[i - 1];
+            #pragma omp  atomic update
             fx += 100.0 * pow(a - pow(b, 2), 2) + pow(1.0 - b, 2);
+            #pragma omp atomic write 
             grad[i] = 200.0 * (a - pow(b, 2));
-            grad[i - 1] = 2.0 * (-200.0 * a * b + 200 * pow(b, 3) + b - 1);
+            #pragma omp atomic write
+            grad[i - 1] = 2.0 * (-200.0 * a * b + 200 * pow(b, 3) + b - 1);                
         }
         return fx;
     }
