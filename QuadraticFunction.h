@@ -20,6 +20,9 @@ public:
         fx += 101 * pow(x[1], 2);
         grad[1] = 202 * x[1];
 
+        #ifdef USE_PARALLEL_PROG
+        #pragma omp parallel for
+        #endif
         for (int i = 2; i <= size - 3; i++)
         {
             fx += 201 * pow(x[i], 2);

@@ -1,4 +1,5 @@
 #include "PowerSingularFunction.h"
+#include <atomic>
 
 PowerSingularFunction::PowerSingularFunction(int size) : IFunction(size, prepareInitialVector(size))
 {
@@ -30,16 +31,15 @@ double PowerSingularFunction::operator()(const VectorXd &x, VectorXd &grad)
         double b = x[i - 2];
         double c = x[i - 1];
         double d = x[i];
-        // #ifdef USE_PARALLEL_PROG
-        // #pragma omp critical
-        // #endif
-        // {
+
+#ifdef USE_PARALLEL_PROG
+#pragma omp atomic update
+#endif
         fx += pow(a + 10.0 * b, 2) + 5.0 * pow(c - d, 2) + pow(b - 2.0 * c, 4) + 10.0 * pow(a - d, 4);
         grad[i - 3] = 40.0 * pow(a - d, 3) + 2.0 * a + 20.0 * b;
         grad[i - 2] = 20.0 * a + 200.0 * b + 4.0 * pow(b - 2.0 * c, 3);
         grad[i - 1] = 10.0 * (c - d) - 8.0 * pow(b - 2.0 * c, 3);
         grad[i] = 10.0 * (-4.0 * pow(a - d, 3) - c + d);
-        // }
     }
     return fx;
 }

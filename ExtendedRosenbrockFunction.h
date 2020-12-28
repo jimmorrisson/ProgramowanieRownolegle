@@ -34,13 +34,7 @@ public:
             #pragma omp  atomic update
             #endif
             fx += 100.0 * pow(a - pow(b, 2), 2) + pow(1.0 - b, 2);
-            #ifdef USE_PARALLEL_PROG
-            #pragma omp atomic write
-            #endif 
             grad[i] = 200.0 * (a - pow(b, 2));
-            #ifdef USE_PARALLEL_PROG
-            #pragma omp atomic write
-            #endif
             grad[i - 1] = 2.0 * (-200.0 * a * b + 200 * pow(b, 3) + b - 1);                
         }
         return fx;
