@@ -7,6 +7,11 @@ include_directories(libs/eigen/)
 set (CMAKE_CXX_STANDARD 17)
 add_compile_options(-Wall -DEIGEN_DONT_PARALLELIZE)
 find_package(OpenMP REQUIRED)
+option(WITH_PARALLEL_PROG "Option description" ON)
+
+if(WITH_PARALLEL_PROG)
+  add_definitions(-DUSE_PARALLEL_PROG)
+endif()
 
 file(GLOB_RECURSE LIBS_DIR "libs/*.c" "libs/*.h" "libs/*.cpp" "libs/*.hpp")
 

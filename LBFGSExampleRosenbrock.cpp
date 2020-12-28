@@ -12,7 +12,9 @@ LBFGSExampleRosenbrock::LBFGSExampleRosenbrock(int size) : IFunction(size, prepa
 double LBFGSExampleRosenbrock::operator()(const VectorXd &x, VectorXd &grad)
 {
     double fx = 0.0;
-#pragma omp parallel for
+    #ifdef USE_PARALLEL_PROG
+    #pragma omp parallel for
+    #endif
     for (int i = 0; i < size; i += 2)
     {
         double t1 = 1.0 - x[i];

@@ -45,43 +45,56 @@ int BFGSolver::solve(IFunction &func, VectorXd &Xk, double &fx)
     VectorXd gradXk = VectorXd::Zero(size);
 
     volatile bool flag = false;
+#ifdef USE_PARALLEL_PROG
 #pragma omp parallel for shared(flag)
+#endif
     for (int iter = 1; iter <= max_iterations; iter++)
     {
         if (flag)
             continue;
-#pragma omp critical
+        #pragma omp atomic write
+        fx = func(Xk, gradXk);
+
+        double n = gradXk.norm();
+        #pragma omp critical 
         {
-            fx = func(Xk, gradXk);
-
-            double n = gradXk.norm();
-
-            if (n <= epsilon)
-            {
-                // Solution found
-                flag = true;
-            }
-
-            // Step 2 search direction
-            VectorXd Dk = -Hk * gradXk;
-
-            // Step 3 step length using Armijo rule
-            VectorXd Xk1 = VectorXd::Zero(size);
-            VectorXd gradXk1 = VectorXd::Zero(size);
-            // #ifdef PARALLEL_PROG
-            double step{};
-            step = ArmijoBackTrack(func, fx, Xk, gradXk, Dk, Xk1, gradXk1, 1, 0.2, 0.0001);
-
-            // #else
-            // double step = ArmijoBackTrack(func, fx, Xk, gradXk, Dk, Xk1, gradXk1, 1, 0.2, 0.0001);
-            // Step 4 matrix Hk+1
-            VectorXd Sk = step * Dk;
-            VectorXd Yk = gradXk1 - gradXk;
-            double hC = 1 / (Yk.transpose() * Sk);
-            Hk = (I - hC * Sk * Yk.transpose()) * Hk * (I - hC * Yk * Sk.transpose()) + hC * Sk * Sk.transpose();
-
-            Xk = Xk1;
+            std::cout << "N: " << n << std::endl;
         }
+
+        if (n <= epsilon)
+        {
+            // Solution found
+            #ifndef USE_PARALLEL_PROG
+            return iter;
+            #else     
+            #pragma omp atomic write       
+            flag = true;
+            #endif
+        }
+
+        // Step 2 search direction
+        VectorXd Dk = -Hk * gradXk;
+
+        // Step 3 step length using Armijo rule
+        VectorXd Xk1 = VectorXd::Zero(size);
+        VectorXd gradXk1 = VectorXd::Zero(size);
+        // double step{};
+// #ifdef USE_PARALLEL_PROG
+// #pragma omp atomic write
+// #endif
+        const auto step = ArmijoBackTrack(func, fx, Xk, gradXk, Dk, Xk1, gradXk1, 1, 0.2, 0.0001);
+
+        // Step 4 matrix Hk+1
+        VectorXd Sk = step * Dk;
+        VectorXd Yk = gradXk1 - gradXk;
+        const auto Yk_trans = Yk.transpose();
+        const auto Sk_trans = Sk.transpose();
+        double hC = 1 / (Yk_trans * Sk);
+        const auto new_Hk = (I - hC * Sk * Yk_trans) * Hk * (I - hC * Yk * Sk_trans) + hC * Sk * Sk_trans;
+        Hk = new_Hk;
+
+        Xk = Xk1;
+        // }
     }
 
     // Iterations limit reached
