@@ -4,6 +4,8 @@
 #include <Eigen/Core>
 #include <Eigen/Dense>
 #include <LBFGS.h>
+#include <matrix.h>
+#include <vector.h>
 using Eigen::VectorXd;
 using Eigen::MatrixXd;
 using namespace LBFGSpp;
@@ -21,6 +23,8 @@ public:
 	virtual ~IFunction() = default;
 
 	VectorXd getInitialVector();
+
+	virtual double operator()(const math::Vector& x, math::Vector& grad) = 0;
 
 	virtual double operator()(const VectorXd& x, VectorXd& grad) = 0;
 
