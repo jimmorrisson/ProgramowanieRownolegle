@@ -1,5 +1,5 @@
-#include <math.h>
-#include <LBFGS.h>
+#include <climits>
+#include <cmath>
 #include "LBFGSExampleRosenbrock.h"
 #include "ExtendedRosenbrockFunction.h"
 #include "QuadraticFunction.h"
@@ -12,8 +12,7 @@
 
 int main(int argc, char* argv[])
 {
-    TestUtil testUtilLib(1e-6, INT_MAX, true);
-    TestUtil testUtilAlg(0.01, INT_MAX, false);
+    TestUtil testUtilAlg(0.01, INT_MAX);
 
 
     if (argc != 2) {

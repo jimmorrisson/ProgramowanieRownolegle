@@ -2,8 +2,6 @@
 #include "IFunction.h"
 #include <atomic>
 #include <cstdio>
-#include <Eigen/Dense>
-#include <LBFGS.h>
 #include <matrix.h>
 #ifdef USE_PARALLEL_PROG
 #include <omp.h>

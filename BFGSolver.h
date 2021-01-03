@@ -1,5 +1,4 @@
 #pragma once
-#include <Eigen/Core>
 #include <vector.h>
 class IFunction;
 

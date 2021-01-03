@@ -1,6 +1,5 @@
 #pragma once
 #include <chrono>
-#include <LBFGS.h>
 #include "IFunction.h"
 #include "BFGSolver.h"
 
@@ -9,19 +8,6 @@ class TestUtil
 private:
 	double epsilon;
 	int max_iterations;
-	bool useLBFGSLib;
-
-	int solveLBFGSLib(IFunction& func, VectorXd& initialVector, double& fx)
-	{
-		// Create solver and function object
-		LBFGSParam<double> param;
-		param.epsilon = epsilon;
-		param.max_iterations = max_iterations;
-		param.linesearch = LBFGS_LINESEARCH_BACKTRACKING_ARMIJO;
-		LBFGSSolver<double, LineSearchBracketing> solver(param);
-		
-		return solver.minimize(func, initialVector, fx);
-	}
 
 	void solveBFGSImpl(IFunction& func, math::Vector& initialVector, double& fx)
 	{
@@ -30,8 +16,8 @@ private:
 	}
 
 public:
-	TestUtil(double epsilon, int max_iterations, bool useLBFGSLib) : 
-		epsilon(epsilon), max_iterations(max_iterations), useLBFGSLib(useLBFGSLib) {}
+	TestUtil(double epsilon, int max_iterations) : 
+		epsilon(epsilon), max_iterations(max_iterations) {}
 
 	void runTest(IFunction& func)
 	{
@@ -39,17 +25,11 @@ public:
 		// std::cout << func;
 
 		auto initialVector = func.getInitialVector();
-		auto initialVector_v2 = func.getInitialVector_v2();
 		double fx;
 
 		// Running test
 		auto t1 = std::chrono::high_resolution_clock::now();
-		if (useLBFGSLib) {
-			solveLBFGSLib(func, initialVector, fx);
-		}
-		else {
-			solveBFGSImpl(func, initialVector_v2, fx);
-		}
+		solveBFGSImpl(func, initialVector, fx);
 		auto t2 = std::chrono::high_resolution_clock::now();
 		
 		// std::cout << "x = \n" << initialVector.format(Eigen::IOFormat(Eigen::FullPrecision, 0, " ", ", ", "", "")) << std::endl;
