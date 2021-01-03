@@ -18,12 +18,7 @@ double BFGSolver::ArmijoBackTrack(IFunction &func,
                                   Eigen::VectorXd &Dk, VectorXd &Xk1, Eigen::VectorXd &gradXk1,
                                   double &&alpha, const double alphaCoeff, const double delta) const
 {
-    auto test = gradXk.transpose() * Dk;
     const double armijoCoeff = delta * gradXk.transpose() * Dk;
-    std::cout << gradXk << std::endl;
-    std::cout << "Transposed: " << gradXk.transpose() << std::endl;
-    std::cout << "Trans  * Dk (" << Dk << ") = " << test << std::endl;
-    std::cin.get();
     std::atomic<bool> go(true);
 #ifdef USE_PARALLEL_PROG
 #pragma omp parallel shared(Xk1, alpha)
@@ -64,12 +59,7 @@ double BFGSolver::ArmijoBackTrack(IFunction &func,
                                   math::Vector &Dk, math::Vector &Xk1, math::Vector &gradXk1, double &&alpha,
                                   const double alphaCoeff, const double delta) const
 {
-    auto test = math::Matrix::transpose(gradXk) * Dk;
     const double armijoCoeff = delta * (math::Matrix::transpose(gradXk) * Dk).to_scalar();
-    // std::cout << gradXk << std::endl;
-    // std::cout << "Transposed: " << math::Matrix::transpose(gradXk) << std::endl;
-    // std::cout << "Trans  * Dk (" << Dk << ") = " << test << std::endl;
-    // std::cin.get();
     std::atomic<bool> go(true);
 #ifdef USE_PARALLEL_PROG
 #pragma omp parallel shared(Xk1, alpha)
@@ -242,7 +232,9 @@ void BFGSolver::solve(IFunction &func, math::Vector &Xk, double &fx)
             math::Vector Xk1(size);
             math::Vector gradXk1(size);
             double step{};
+#ifdef USE_PARALLEL_PROG
 #pragma omp atomic write
+#endif
             step = ArmijoBackTrack(func, fx, Xk, gradXk, Dk, Xk1, gradXk1, 1, 0.2, 0.0001);
 
             // Step 4 matrix Hk+1
@@ -252,7 +244,9 @@ void BFGSolver::solve(IFunction &func, math::Vector &Xk, double &fx)
             const auto Sk_trans = math::Matrix::transpose(Sk);
             double hC = 1 / (Yk_trans * Sk).to_scalar();
             const auto new_Hk = ((I - hC * (Sk * Yk_trans).to_scalar()) * Hk * (I - hC * (Yk * Sk_trans).to_scalar()) + hC * (Sk * Sk_trans).to_scalar());
+#ifdef USE_PARALLEL_PROG
 #pragma omp critical
+#endif
             {
                 Hk = new_Hk;
                 Xk = Xk1;
@@ -260,5 +254,7 @@ void BFGSolver::solve(IFunction &func, math::Vector &Xk, double &fx)
             i++;
         }
     }
+#ifdef USE_PARALLEL_PROG
 #pragma omp barrier
+#endif
 }

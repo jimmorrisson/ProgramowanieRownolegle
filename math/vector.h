@@ -1,4 +1,5 @@
 #pragma once
+#include <cassert>
 #include <cmath>
 #include <memory>
 
@@ -78,17 +79,10 @@ public:
     }
 
     friend std::ostream& operator<<(std::ostream& out, const Vector& vec);
-
-    // const Vector& transpose()
-    // {
-    //     return *this;
-    // }
-
     friend Vector operator*(double lhs, const Vector &rhs);
     friend Vector operator-(const Vector &lhs, const Vector &rhs);
     friend Vector operator+(const Vector &lhs, const Vector &rhs);
     friend double operator*(const Vector &lhs, const Vector &rhs);
-    // friend Vector operator*(Vector lhs, double rhs);
 
 private:
     std::unique_ptr<double[]> arr;

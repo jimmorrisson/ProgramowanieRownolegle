@@ -3,25 +3,23 @@
 
 namespace math
 {
-    Matrix::Matrix(const std::size_t rows, const std::size_t cols) :
-        arr{std::make_unique<std::unique_ptr<double[]>[]>(rows)},
-        rows{rows},
-        cols{cols}
+    Matrix::Matrix(const std::size_t rows, const std::size_t cols) : arr{std::make_unique<std::unique_ptr<double[]>[]>(rows)},
+                                                                     rows{rows},
+                                                                     cols{cols}
     {
-        for(std::size_t i = 0; i < rows; i++)
+        for (std::size_t i = 0; i < rows; i++)
         {
             auto oneDimArr = std::make_unique<double[]>(cols);
             arr[i] = std::move(oneDimArr);
         }
     }
 
-    Matrix::Matrix(const Matrix &matrix) : 
-        arr{std::make_unique<std::unique_ptr<double[]>[]>(matrix.rows)},
-        rows{matrix.rows},
-        cols{matrix.cols}
+    Matrix::Matrix(const Matrix &matrix) : arr{std::make_unique<std::unique_ptr<double[]>[]>(matrix.rows)},
+                                           rows{matrix.rows},
+                                           cols{matrix.cols}
 
     {
-        for(std::size_t row = 0; row < rows; row++)
+        for (std::size_t row = 0; row < rows; row++)
         {
             auto oneDimArr = std::make_unique<double[]>(cols);
             arr[row] = std::move(oneDimArr);
@@ -32,17 +30,15 @@ namespace math
         }
     }
 
-    Matrix::Matrix(Matrix &&matrix) :
-        arr{std::move(matrix.arr)},
-        rows{matrix.rows},
-        cols{matrix.cols}
+    Matrix::Matrix(Matrix &&matrix) : arr{std::move(matrix.arr)},
+                                      rows{matrix.rows},
+                                      cols{matrix.cols}
     {
     }
 
-    Matrix::Matrix() :
-        arr{nullptr},
-        rows{0},
-        cols{0}
+    Matrix::Matrix() : arr{nullptr},
+                       rows{0},
+                       cols{0}
     {
     }
 
@@ -82,14 +78,14 @@ namespace math
     {
         return operator*(vector, matrix);
     }
-    
+
     Matrix operator-(const Matrix &matrix, const double value)
     {
         Matrix ret{matrix};
         auto sub = Matrix::identity(matrix.rows) * value;
         return ret - sub;
     }
-    
+
     Matrix operator-(const Matrix &lhs, const Matrix &rhs)
     {
         assert(lhs.rows == rhs.rows && lhs.cols == rhs.cols);
@@ -103,7 +99,7 @@ namespace math
         }
         return Matrix(std::move(ret));
     }
-    
+
     Matrix operator*(const Matrix &lhs, const Matrix &rhs)
     {
         assert(lhs.cols == rhs.rows);
@@ -123,7 +119,7 @@ namespace math
         auto sub = Matrix::identity(matrix.rows) * value;
         return ret + sub;
     }
-    
+
     Matrix operator+(const Matrix &lhs, const Matrix &rhs)
     {
         assert(lhs.rows == rhs.rows && lhs.cols == rhs.cols);
@@ -151,17 +147,4 @@ namespace math
 
         return out;
     }
-
-    // Matrix Matrix::add_inv(const Matrix &matrix) const
-    // {
-    //     Matrix ret{matrix};
-    //     for (std::size_t row = 0; row < matrix.rows; row++)
-    //     {
-    //         for (std::size_t col = 0; col < matrix.cols; col++)
-    //         {
-    //             ret.at(row, col) *= -1;
-    //         }
-    //     }
-    //     return Matrix(std::move(ret));
-    // }
-    } // namespace math
+} // namespace math

@@ -1,4 +1,5 @@
 #pragma once
+#include <cassert>
 #include <memory>
 #include "vector.h"
 #include <ostream>

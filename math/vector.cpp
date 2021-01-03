@@ -1,4 +1,5 @@
 #include "vector.h"
+#include <cassert>
 #include <iostream>
 
 namespace math
@@ -79,9 +80,4 @@ std::ostream& operator<<(std::ostream& out, const Vector& vec)
 
     return out;
 }
-
-// Vector operator*(Vector lhs, double rhs)
-// {
-//     return operator*(rhs, lhs);
-// }
 } // namespace math
