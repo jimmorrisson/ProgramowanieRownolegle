@@ -23,12 +23,6 @@ private:
 		return solver.minimize(func, initialVector, fx);
 	}
 
-	void solveBFGSImpl(IFunction& func, VectorXd& initialVector, double& fx)
-	{
-		BFGSolver solver(epsilon, max_iterations);
-		return solver.solve(func, initialVector, fx);
-	}
-
 	void solveBFGSImpl(IFunction& func, math::Vector& initialVector, double& fx)
 	{
 		BFGSolver solver(epsilon, max_iterations);

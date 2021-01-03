@@ -4,7 +4,7 @@
 class PowerSingularFunction final : public IFunction
 {
 private:
-    VectorXd prepareInitialVector(int size);
+    math::Vector prepareInitialVector(int size);
 
 public:
     PowerSingularFunction(int size);

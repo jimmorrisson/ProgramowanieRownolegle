@@ -1,22 +1,22 @@
 #include "PowerSingularFunction.h"
 #include <atomic>
 
-PowerSingularFunction::PowerSingularFunction(int size) : IFunction(size, math::Vector(size))
+PowerSingularFunction::PowerSingularFunction(int size) : IFunction(size, prepareInitialVector(size))
 {
 }
 
-VectorXd PowerSingularFunction::prepareInitialVector(int size)
+math::Vector PowerSingularFunction::prepareInitialVector(int size)
 {
-    VectorXd x = VectorXd::Zero(size);
+    math::Vector x(size);
     for (int i = 3; i < size; i += 4)
     {
-        x[i - 3] = 3;
-        x[i - 2] = -1;
-        x[i - 1] = 0;
-        x[i] = 1;
+        x.at(i - 3) = 3;
+        x.at(i - 2) = -1;
+        x.at(i - 1) = 0;
+        x.at(i) = 1;
     }
 
-    return x;
+    return math::Vector(std::move(x));
 }
 
 double PowerSingularFunction::operator()(const math::Vector& x, math::Vector& grad)
