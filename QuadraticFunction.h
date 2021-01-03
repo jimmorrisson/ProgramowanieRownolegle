@@ -10,7 +10,7 @@ private:
     }
 
 public:
-    QuadraticFunction(int size) :IFunction(size, prepareInitialVector(size)) {}
+    QuadraticFunction(int size) :IFunction(size, math::Vector(size)) {}
 
     double operator()(const math::Vector& x, math::Vector& grad)
     {

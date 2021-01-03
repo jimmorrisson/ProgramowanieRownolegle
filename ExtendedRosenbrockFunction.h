@@ -18,7 +18,7 @@ private:
 	}
 
 public:
-    ExtendedRosenbrockFunction(int size) :IFunction(size, prepareInitialVector(size)) {}
+    ExtendedRosenbrockFunction(int size) :IFunction(size, math::Vector(size)) {}
 
     double operator()(const math::Vector& x, math::Vector& grad)
     {

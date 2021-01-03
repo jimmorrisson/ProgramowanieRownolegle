@@ -1,7 +1,7 @@
 #include "PowerSingularFunction.h"
 #include <atomic>
 
-PowerSingularFunction::PowerSingularFunction(int size) : IFunction(size, prepareInitialVector(size))
+PowerSingularFunction::PowerSingularFunction(int size) : IFunction(size, math::Vector(size))
 {
 }
 
