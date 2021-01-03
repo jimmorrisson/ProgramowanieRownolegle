@@ -14,8 +14,10 @@ class IFunction
 {
 protected:
 	VectorXd initialVector;
+	math::Vector initialVector_v2;
 
 	IFunction(int size, VectorXd initialVector);
+	IFunction(int size, math::Vector initialVector);
 
 public:
 	const int size;
@@ -23,6 +25,7 @@ public:
 	virtual ~IFunction() = default;
 
 	VectorXd getInitialVector();
+	math::Vector getInitialVector_v2();
 
 	virtual double operator()(const math::Vector& x, math::Vector& grad) = 0;
 

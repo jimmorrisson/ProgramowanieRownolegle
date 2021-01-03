@@ -29,6 +29,12 @@ private:
 		return solver.solve(func, initialVector, fx);
 	}
 
+	void solveBFGSImpl(IFunction& func, math::Vector& initialVector, double& fx)
+	{
+		BFGSolver solver(epsilon, max_iterations);
+		return solver.solve(func, initialVector, fx);
+	}
+
 public:
 	TestUtil(double epsilon, int max_iterations, bool useLBFGSLib) : 
 		epsilon(epsilon), max_iterations(max_iterations), useLBFGSLib(useLBFGSLib) {}
@@ -38,7 +44,8 @@ public:
 		std::cout << "<--------------STARTING TEST-------------->" << std::endl;
 		// std::cout << func;
 
-		VectorXd initialVector = func.getInitialVector();
+		auto initialVector = func.getInitialVector();
+		auto initialVector_v2 = func.getInitialVector_v2();
 		double fx;
 
 		// Running test
@@ -47,7 +54,7 @@ public:
 			solveLBFGSLib(func, initialVector, fx);
 		}
 		else {
-			solveBFGSImpl(func, initialVector, fx);
+			solveBFGSImpl(func, initialVector_v2, fx);
 		}
 		auto t2 = std::chrono::high_resolution_clock::now();
 		

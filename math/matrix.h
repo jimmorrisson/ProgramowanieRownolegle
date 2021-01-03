@@ -55,10 +55,13 @@ public:
         return arr[row][col];
     }
 
+    friend Matrix operator*(const Matrix &matrix, const double value);
+    friend Matrix operator*(const double value, const Matrix &matrix);
     friend Vector operator*(const Vector &vector, const Matrix &matrix);
     friend Vector operator*(const Matrix &matrix, const Vector &vector);
-    friend Vector operator-(Vector vector);
-
+    friend Matrix operator-(const Matrix &matrix, const double value);
+    friend Matrix operator-(const Matrix &lhs, const Matrix &rhs);
+    // friend Matrix operator*(const Matrix &lhs, const Matrix &rhs);
 private:
     std::unique_ptr<std::unique_ptr<double[]>[]> arr;
     const std::size_t rows;

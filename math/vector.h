@@ -68,9 +68,14 @@ public:
         return std::sqrt(ret);
     }
 
-    Vector& transpose()
+    // const Vector& transpose()
+    // {
+    //     return *this;
+    // }
+
+    Vector transpose()
     {
-        return *this;
+        return Vector{};
     }
 
     friend Vector operator*(double lhs, const Vector &rhs);

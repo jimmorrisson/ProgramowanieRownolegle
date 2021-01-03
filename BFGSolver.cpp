@@ -239,7 +239,7 @@ void BFGSolver::solve(IFunction &func, math::Vector &Xk, double &fx)
             const auto Yk_trans = Yk.transpose();
             const auto Sk_trans = Sk.transpose();
             double hC = 1 / (Yk_trans * Sk);
-            const auto new_Hk = (I - hC * Sk * Yk_trans) * Hk * (I - hC * Yk * Sk_trans) + hC * Sk * Sk_trans;
+            const auto new_Hk = (I - hC * Sk * Yk_trans); //* Hk * (I - hC * Yk * Sk_trans) + hC * Sk * Sk_trans;
 #pragma omp critical
             {
                 Hk = new_Hk;
