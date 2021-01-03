@@ -5,7 +5,6 @@ namespace math
 {
 Vector::Vector(const std::size_t size, const double value) : arr{std::make_unique<double[]>(size)}, size{size}
 {
-    std::cout << "Constructor\n";
     for (std::size_t i = 0; i < size; i++)
     {
         arr[i] = value;
@@ -16,13 +15,7 @@ Vector::Vector(const Vector &vector) : arr{std::make_unique<double[]>(vector.siz
 {
     for (std::size_t i = 0; i < size; i++)
     {
-        std::cout << arr[i] << ", " << vector.arr[i] << std::endl;
         arr[i] = vector.arr[i];
-    }
-
-    for (std::size_t i = 0; i < size; i++)
-    {
-        std::cout << arr[i] << ", " << vector.arr[i] << std::endl;
     }
 }
 
@@ -74,6 +67,7 @@ double operator*(const Vector &lhs, const Vector &rhs)
     {
         ret += (lhs.at_r(i) * rhs.at_r(i));
     }
+    return ret;
 }
 
 // Vector operator*(Vector lhs, double rhs)

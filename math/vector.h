@@ -16,7 +16,10 @@ public:
     {
         arr = std::make_unique<double[]>(vector.size);
         size = vector.size;
-        memcpy(arr.get(), vector.arr.get(), vector.size);
+        for (std::size_t i = 0; i < size; i++)
+        {
+            at(i) = vector.at_r(i);
+        }
         return *this;
     }
     Vector &operator=(Vector &&vector)
@@ -68,15 +71,16 @@ public:
         return std::sqrt(ret);
     }
 
+    double to_scalar() const 
+    {   
+        assert(size == 1);
+        return at_r(0);
+    }
+
     // const Vector& transpose()
     // {
     //     return *this;
     // }
-
-    Vector transpose()
-    {
-        return Vector{};
-    }
 
     friend Vector operator*(double lhs, const Vector &rhs);
     friend Vector operator-(const Vector &lhs, const Vector &rhs);

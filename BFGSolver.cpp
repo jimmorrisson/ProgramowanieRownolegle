@@ -59,7 +59,7 @@ double BFGSolver::ArmijoBackTrack(IFunction &func,
                                   math::Vector &Dk, math::Vector &Xk1, math::Vector &gradXk1, double &&alpha,
                                   const double alphaCoeff, const double delta) const
 {
-    const double armijoCoeff = delta * gradXk.transpose() * Dk;
+    const double armijoCoeff = delta * (math::Matrix::transpose(gradXk) * Dk).to_scalar();
     std::atomic<bool> go(true);
 #ifdef USE_PARALLEL_PROG
 #pragma omp parallel shared(Xk1, alpha)
@@ -202,9 +202,11 @@ void BFGSolver::solve(IFunction &func, math::Vector &Xk, double &fx)
             give += max_iterations / omp_get_num_threads();
 #endif
             stop = max_iterations;
-            I = math::Matrix::identity(size);
-            Hk = math::Matrix::identity(size);
-            gradXk = math::Vector(size);
+            const auto mIdentity = math::Matrix::identity(size);
+            const auto vectorZero = math::Vector(size);
+            I = mIdentity;
+            Hk = mIdentity;
+            gradXk = vectorZero;
 #ifdef USE_PARALLEL_PROG
             if (omp_get_thread_num() == omp_get_num_threads() - 1)
                 stop = max_iterations;
@@ -234,12 +236,12 @@ void BFGSolver::solve(IFunction &func, math::Vector &Xk, double &fx)
             step = ArmijoBackTrack(func, fx, Xk, gradXk, Dk, Xk1, gradXk1, 1, 0.2, 0.0001);
 
             // Step 4 matrix Hk+1
-            auto Sk = step * Dk;
+            const auto Sk = step * Dk;
             auto Yk = gradXk1 - gradXk;
-            const auto Yk_trans = Yk.transpose();
-            const auto Sk_trans = Sk.transpose();
-            double hC = 1 / (Yk_trans * Sk);
-            const auto new_Hk = (I - hC * Sk * Yk_trans); //* Hk * (I - hC * Yk * Sk_trans) + hC * Sk * Sk_trans;
+            const auto Yk_trans = math::Matrix::transpose(Yk);
+            const auto Sk_trans = math::Matrix::transpose(Sk);
+            double hC = 1 / (Yk_trans * Sk).to_scalar();
+            const auto new_Hk = ((I - hC * (Sk * Yk_trans).to_scalar()) * Hk * (I - hC * (Yk * Sk_trans).to_scalar()) + hC * (Sk * Sk_trans).to_scalar());
 #pragma omp critical
             {
                 Hk = new_Hk;

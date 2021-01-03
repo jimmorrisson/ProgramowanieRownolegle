@@ -31,10 +31,16 @@ public:
     Matrix &operator=(const Matrix &matrix)
     {
         arr = std::make_unique<std::unique_ptr<double[]>[]>(matrix.rows);
-        for(std::size_t i = 0; i < rows; i++)
+        rows = matrix.rows;
+        cols = matrix.cols;
+        for(std::size_t row = 0; row < rows; row++)
         {
             auto oneDimArr = std::make_unique<double[]>(cols);
-            arr[i] = std::move(oneDimArr);
+            arr[row] = std::move(oneDimArr);
+            for(std::size_t col = 0; col < cols; col++)
+            {
+                at(row, col) = matrix.at_r(row, col);
+            }
         }
 
         return *this;
@@ -55,16 +61,31 @@ public:
         return arr[row][col];
     }
 
+    double to_scalar() const 
+    {   
+        assert(rows == 1 && cols == 1);
+        return at_r(0, 0);
+    }
+
+    static Matrix transpose(const Vector &vector)
+    {
+        Matrix ret{1, vector.getSize()};
+        return Matrix(std::move(ret));
+    }
+
     friend Matrix operator*(const Matrix &matrix, const double value);
     friend Matrix operator*(const double value, const Matrix &matrix);
     friend Vector operator*(const Vector &vector, const Matrix &matrix);
     friend Vector operator*(const Matrix &matrix, const Vector &vector);
     friend Matrix operator-(const Matrix &matrix, const double value);
     friend Matrix operator-(const Matrix &lhs, const Matrix &rhs);
-    // friend Matrix operator*(const Matrix &lhs, const Matrix &rhs);
+    friend Matrix operator*(const Matrix &lhs, const Matrix &rhs);
+    friend Matrix operator+(const Matrix &matrix, const double value);
+    friend Matrix operator+(const Matrix &lhs, const Matrix &rhs);
+
 private:
     std::unique_ptr<std::unique_ptr<double[]>[]> arr;
-    const std::size_t rows;
-    const std::size_t cols;
+    std::size_t rows;
+    std::size_t cols;
 };
 } // namespace math

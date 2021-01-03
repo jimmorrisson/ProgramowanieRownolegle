@@ -12,28 +12,6 @@
 
 int main(int argc, char* argv[])
 {
-    const auto s = 4;
-    math::Vector vec{s, 1};
-    auto asdf = 4 * vec;
-    for (int i = 0; i < s; i++)
-    {
-        std::cout << asdf.at(i) << "\n";
-    }
-    auto mat = math::Matrix::identity(s);
-    for (int i = 0; i < s; i++)
-    {
-        for (int j = 0; j < s; j++)
-        {
-            std::cout << mat.at(i, j) << " ";
-        }
-        std::cout << "\n";
-    }
-
-    const auto vec_2 = asdf * mat;
-    for (int i = 0; i < vec_2.getSize(); i++)
-    {
-        std::cout << vec_2.at_r(i) << "\n";
-    }
     TestUtil testUtilLib(1e-6, INT_MAX, true);
     TestUtil testUtilAlg(0.01, INT_MAX, false);
 

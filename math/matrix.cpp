@@ -104,15 +104,37 @@ namespace math
         return Matrix(std::move(ret));
     }
     
-    // Matrix operator*(const Matrix &lhs, const Matrix &rhs)
-    // {
-    //     assert(lhs.cols == rhs.rows);
-    //     Matrix ret{lhs.rows, rhs.cols};
-    //     for (std::size_t row = 0; row < ret.rows; row++)
-    //     {
-    //         for (std::size_t col = 0; col < lhs.cols; col++)
-    //         {
-    //         }
-    //     }
-    // }
+    Matrix operator*(const Matrix &lhs, const Matrix &rhs)
+    {
+        assert(lhs.cols == rhs.rows);
+        Matrix ret{lhs.rows, rhs.cols};
+        for (std::size_t row = 0; row < ret.rows; row++)
+        {
+            for (std::size_t col = 0; col < lhs.cols; col++)
+            {
+            }
+        }
+        return Matrix(std::move(ret));
+    }
+
+    Matrix operator+(const Matrix &matrix, const double value)
+    {
+        Matrix ret{matrix};
+        auto sub = Matrix::identity(matrix.rows) * value;
+        return ret + sub;
+    }
+    
+    Matrix operator+(const Matrix &lhs, const Matrix &rhs)
+    {
+        assert(lhs.rows == rhs.rows && lhs.cols == rhs.cols);
+        Matrix ret{lhs};
+        for (std::size_t row = 0; row < lhs.rows; row++)
+        {
+            for (std::size_t col = 0; col < lhs.cols; col++)
+            {
+                ret.at(row, col) += rhs.at_r(row, col);
+            }
+        }
+        return Matrix(std::move(ret));
+    }
 } // namespace math
