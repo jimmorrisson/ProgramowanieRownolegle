@@ -200,6 +200,7 @@ void BFGSolver::solve(IFunction &func, math::Vector &Xk, double &fx)
             i = give;
 #ifdef USE_PARALLEL_PROG
             give += max_iterations / omp_get_num_threads();
+            go = true;
 #endif
             stop = max_iterations;
             const auto mIdentity = math::Matrix::identity(size);
