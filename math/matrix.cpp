@@ -137,4 +137,31 @@ namespace math
         }
         return Matrix(std::move(ret));
     }
-} // namespace math
+
+    std::ostream &operator<<(std::ostream &out, const Matrix &matrix)
+    {
+        for (std::size_t row = 0; row < matrix.rows; row++)
+        {
+            for (std::size_t col = 0; col < matrix.cols; col++)
+            {
+                out << matrix.at_r(row, col) << " ";
+            }
+            out << std::endl;
+        }
+
+        return out;
+    }
+
+    // Matrix Matrix::add_inv(const Matrix &matrix) const
+    // {
+    //     Matrix ret{matrix};
+    //     for (std::size_t row = 0; row < matrix.rows; row++)
+    //     {
+    //         for (std::size_t col = 0; col < matrix.cols; col++)
+    //         {
+    //             ret.at(row, col) *= -1;
+    //         }
+    //     }
+    //     return Matrix(std::move(ret));
+    // }
+    } // namespace math

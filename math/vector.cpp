@@ -70,6 +70,16 @@ double operator*(const Vector &lhs, const Vector &rhs)
     return ret;
 }
 
+std::ostream& operator<<(std::ostream& out, const Vector& vec)
+{
+    for (std::size_t i = 0; i < vec.size; i++)
+    {
+        out << vec.at_r(i) << std::endl;
+    }
+
+    return out;
+}
+
 // Vector operator*(Vector lhs, double rhs)
 // {
 //     return operator*(rhs, lhs);

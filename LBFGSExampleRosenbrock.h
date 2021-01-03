@@ -4,6 +4,7 @@
 class LBFGSExampleRosenbrock final : public IFunction
 {
 private:
+    VectorXd prepareInitialVector(int size);
 
 public:
     LBFGSExampleRosenbrock(int size);

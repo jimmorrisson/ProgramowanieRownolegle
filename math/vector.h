@@ -77,6 +77,8 @@ public:
         return at_r(0);
     }
 
+    friend std::ostream& operator<<(std::ostream& out, const Vector& vec);
+
     // const Vector& transpose()
     // {
     //     return *this;

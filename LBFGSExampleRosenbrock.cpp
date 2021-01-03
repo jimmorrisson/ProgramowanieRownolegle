@@ -1,5 +1,10 @@
 #include "LBFGSExampleRosenbrock.h"
 
+VectorXd LBFGSExampleRosenbrock::prepareInitialVector(int size)
+{
+    return VectorXd::Zero(size);
+}
+
 LBFGSExampleRosenbrock::LBFGSExampleRosenbrock(int size) : IFunction(size, math::Vector(size)) 
 {
 }

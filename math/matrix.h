@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include "vector.h"
+#include <ostream>
 
 namespace math
 {
@@ -70,6 +71,10 @@ public:
     static Matrix transpose(const Vector &vector)
     {
         Matrix ret{1, vector.getSize()};
+        for (std::size_t i = 0; i < vector.getSize(); i++)
+        {
+            ret.at(0, i) = vector.at_r(i);
+        }
         return Matrix(std::move(ret));
     }
 
@@ -82,6 +87,19 @@ public:
     friend Matrix operator*(const Matrix &lhs, const Matrix &rhs);
     friend Matrix operator+(const Matrix &matrix, const double value);
     friend Matrix operator+(const Matrix &lhs, const Matrix &rhs);
+    friend std::ostream &operator<<(std::ostream &out, const Matrix &matrix);
+    static Matrix add_inv(const Matrix &matrix)
+    {
+        Matrix ret{matrix};
+        for (std::size_t row = 0; row < matrix.rows; row++)
+        {
+            for (std::size_t col = 0; col < matrix.cols; col++)
+            {
+                ret.at(row, col) *= -1;
+            }
+        }
+        return Matrix(std::move(ret));
+    }
 
 private:
     std::unique_ptr<std::unique_ptr<double[]>[]> arr;
