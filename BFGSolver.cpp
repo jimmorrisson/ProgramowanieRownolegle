@@ -80,7 +80,7 @@ void BFGSolver::solve(IFunction &func, math::Vector &Xk, double &fx)
             fx = func(Xk, gradXk);
 
             double n = gradXk.norm();
-            printf("N: %f\n", n);
+            // printf("N: %f\n", n);
 
             if (n <= epsilon)
             {

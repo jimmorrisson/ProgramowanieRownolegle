@@ -7,9 +7,15 @@ namespace math
                                                                      rows{rows},
                                                                      cols{cols}
     {
+#ifdef USE_PARALLEL_PROG
+#pragma omp parallel for
+#endif
         for (std::size_t i = 0; i < rows; i++)
         {
             auto oneDimArr = std::make_unique<double[]>(cols);
+#ifdef USE_PARALLEL_PROG
+#pragma omp atomic write
+#endif
             arr[i] = std::move(oneDimArr);
         }
     }
@@ -19,13 +25,22 @@ namespace math
                                            cols{matrix.cols}
 
     {
+#ifdef USE_PARALLEL_PROG
+#pragma omp parallel for
+#endif
         for (std::size_t row = 0; row < rows; row++)
         {
             auto oneDimArr = std::make_unique<double[]>(cols);
+#ifdef USE_PARALLEL_PROG
+#pragma omp atomic write
+#endif
             arr[row] = std::move(oneDimArr);
             for (std::size_t col = 0; col < cols; col++)
             {
-                this->at(row, col) = matrix.at_r(row, col);
+#ifdef USE_PARALLEL_PROG
+#pragma omp atomic write
+#endif
+                at(row, col) = matrix.at_r(row, col);
             }
         }
     }
@@ -45,10 +60,16 @@ namespace math
     Matrix operator*(const Matrix &matrix, const double value)
     {
         Matrix ret(matrix);
+#ifdef USE_PARALLEL_PROG
+#pragma omp parallel for
+#endif
         for (std::size_t row = 0; row < matrix.rows; row++)
         {
             for (std::size_t col = 0; col < matrix.cols; col++)
             {
+#ifdef USE_PARALLEL_PROG
+#pragma omp atomic update
+#endif
                 ret.at(row, col) *= value;
             }
         }
@@ -64,10 +85,16 @@ namespace math
     {
         assert(matrix.cols == vector.getSize());
         Vector ret(matrix.rows);
+#ifdef USE_PARALLEL_PROG
+#pragma omp parallel for
+#endif
         for (std::size_t row = 0; row < matrix.rows; row++)
         {
             for (std::size_t col = 0; col < matrix.cols; col++)
             {
+#ifdef USE_PARALLEL_PROG
+#pragma omp atomic update
+#endif
                 ret.at(row) += (vector.at_r(row) * matrix.at_r(row, col));
             }
         }
@@ -90,10 +117,16 @@ namespace math
     {
         assert(lhs.rows == rhs.rows && lhs.cols == rhs.cols);
         Matrix ret{lhs};
+#ifdef USE_PARALLEL_PROG
+#pragma omp parallel for
+#endif
         for (std::size_t row = 0; row < lhs.rows; row++)
         {
             for (std::size_t col = 0; col < lhs.cols; col++)
             {
+#ifdef USE_PARALLEL_PROG
+#pragma omp atomic update
+#endif
                 ret.at(row, col) -= rhs.at_r(row, col);
             }
         }
@@ -104,10 +137,31 @@ namespace math
     {
         assert(lhs.cols == rhs.rows);
         Matrix ret{lhs.rows, rhs.cols};
+        auto getMultipliedValue = [&ret, &lhs, &rhs](const std::size_t row, const std::size_t col) {
+            double val = 0.;
+#ifdef USE_PARALLEL_PROG
+#pragma omp parallel for
+#endif
+            for (std::size_t i = 0; i < lhs.cols; i++)
+            {
+#ifdef USE_PARALLEL_PROG
+#pragma omp atomic update
+#endif
+                val += (lhs.at_r(row, i) * rhs.at_r(i, col));
+            }
+            return val;
+        };
+#ifdef USE_PARALLEL_PROG
+#pragma omp parallel for
+#endif
         for (std::size_t row = 0; row < ret.rows; row++)
         {
             for (std::size_t col = 0; col < lhs.cols; col++)
             {
+#ifdef USE_PARALLEL_PROG
+#pragma omp atomic write
+#endif
+                ret.at(row, col) = getMultipliedValue(row, col);
             }
         }
         return Matrix(std::move(ret));
@@ -124,10 +178,16 @@ namespace math
     {
         assert(lhs.rows == rhs.rows && lhs.cols == rhs.cols);
         Matrix ret{lhs};
+#ifdef USE_PARALLEL_PROG
+#pragma omp parallel for
+#endif
         for (std::size_t row = 0; row < lhs.rows; row++)
         {
             for (std::size_t col = 0; col < lhs.cols; col++)
             {
+#ifdef USE_PARALLEL_PROG
+#pragma omp atomic update
+#endif
                 ret.at(row, col) += rhs.at_r(row, col);
             }
         }
@@ -136,15 +196,27 @@ namespace math
 
     std::ostream &operator<<(std::ostream &out, const Matrix &matrix)
     {
+#ifdef USE_PARALLEL_PROG
+#pragma omp parallel for
+#endif
         for (std::size_t row = 0; row < matrix.rows; row++)
         {
             for (std::size_t col = 0; col < matrix.cols; col++)
             {
-                out << matrix.at_r(row, col) << " ";
+#ifdef USE_PARALLEL_PROG
+#pragma omp critical
+#endif
+                {
+                    out << matrix.at_r(row, col) << " ";
+                }
             }
-            out << std::endl;
+#ifdef USE_PARALLEL_PROG
+#pragma omp critical
+#endif
+            {
+                out << std::endl;
+            }
         }
-
         return out;
     }
 } // namespace math

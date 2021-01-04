@@ -9,6 +9,7 @@ set (CMAKE_CXX_STANDARD 17)
 option(WITH_PARALLEL_PROG "Option description" ON)
 
 if(WITH_PARALLEL_PROG)
+  add_definitions(-DUSE_PARALLEL_PROG)
   if (WIN32)
     add_compile_options(/W4 /Od)
   else()
