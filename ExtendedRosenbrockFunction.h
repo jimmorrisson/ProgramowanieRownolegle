@@ -4,9 +4,20 @@
 class ExtendedRosenbrockFunction : public IFunction
 {
 private:
+    math::Vector prepareInitialVector(int size)
+    {
+        math::Vector x(size);
+        for (int i = 1; i < size; i += 2)
+        {
+            x.at(i - 1) = -1.2;
+            x.at(i) = 1.0;
+        }
+
+        return math::Vector(std::move(x));
+    }
 public:
     ExtendedRosenbrockFunction(int size) 
-        : IFunction(size, "Extended Rosenbrock function", math::Vector(size)) {}
+        : IFunction(size, "Extended Rosenbrock function", prepareInitialVector(size)) {}
 
     double operator()(const math::Vector& x, math::Vector& grad)
     {
