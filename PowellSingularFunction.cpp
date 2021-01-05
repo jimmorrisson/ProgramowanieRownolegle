@@ -1,11 +1,12 @@
-#include "PowerSingularFunction.h"
+#include "PowellSingularFunction.h"
 #include <atomic>
 
-PowerSingularFunction::PowerSingularFunction(int size) : IFunction(size, prepareInitialVector(size))
+PowellSingularFunction::PowellSingularFunction(int size) 
+    : IFunction(size, "Powell singular function", prepareInitialVector(size))
 {
 }
 
-math::Vector PowerSingularFunction::prepareInitialVector(int size)
+math::Vector PowellSingularFunction::prepareInitialVector(int size)
 {
     math::Vector x(size);
     for (int i = 3; i < size; i += 4)
@@ -19,7 +20,7 @@ math::Vector PowerSingularFunction::prepareInitialVector(int size)
     return math::Vector(std::move(x));
 }
 
-double PowerSingularFunction::operator()(const math::Vector& x, math::Vector& grad)
+double PowellSingularFunction::operator()(const math::Vector& x, math::Vector& grad)
 {
     double fx = 0.0;
 #ifdef USE_PARALLEL_PROG

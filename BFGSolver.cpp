@@ -46,6 +46,15 @@ void BFGSolver::solve(IFunction &func, math::Vector &Xk, double &fx)
 #pragma omp parallel private(go) shared(Xk)
 #endif
     {
+#ifdef USE_PARALLEL_PROG
+        // Only master thread should write to output
+        if (omp_get_thread_num() == 0)
+        {
+            std::cout << "Number of threads = " << omp_get_num_threads() << std::endl;
+        }
+#else
+        std::cout << "Number of threads = " << 1 << std::endl;
+#endif
         uint i;
         uint stop;
         math::Matrix I;
@@ -55,9 +64,6 @@ void BFGSolver::solve(IFunction &func, math::Vector &Xk, double &fx)
 #pragma omp critical
 #endif
         {
-#ifdef USE_PARALLEL_PROG
-            std::cout << "threads=" << omp_get_num_threads() << std::endl;
-#endif
             i = give;
 #ifdef USE_PARALLEL_PROG
             give += max_iterations / omp_get_num_threads();
@@ -80,7 +86,6 @@ void BFGSolver::solve(IFunction &func, math::Vector &Xk, double &fx)
             fx = func(Xk, gradXk);
 
             double n = gradXk.norm();
-            // printf("N: %f\n", n);
 
             if (n <= epsilon)
             {

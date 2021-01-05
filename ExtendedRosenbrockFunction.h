@@ -5,7 +5,8 @@ class ExtendedRosenbrockFunction : public IFunction
 {
 private:
 public:
-    ExtendedRosenbrockFunction(int size) :IFunction(size, math::Vector(size)) {}
+    ExtendedRosenbrockFunction(int size) 
+        : IFunction(size, "Extended Rosenbrock function", math::Vector(size)) {}
 
     double operator()(const math::Vector& x, math::Vector& grad)
     {

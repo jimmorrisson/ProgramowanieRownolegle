@@ -1,9 +1,8 @@
 #include <climits>
 #include <cmath>
-#include "LBFGSExampleRosenbrock.h"
 #include "ExtendedRosenbrockFunction.h"
 #include "QuadraticFunction.h"
-#include "PowerSingularFunction.h"
+#include "PowellSingularFunction.h"
 #include "TestUtil.h"
 #include <memory>
 #include <iostream>
@@ -23,9 +22,7 @@ int main(int argc, char* argv[])
         return -1;
     }
     char *p;
-    int size = strtol(argv[1], &p, 10);    
-    std::unique_ptr<IFunction> exampleRosenbrock = std::make_unique<LBFGSExampleRosenbrock>(size);
-    testUtilAlg.runTest(*exampleRosenbrock.get());
+    int size = strtol(argv[1], &p, 10);
 
     std::unique_ptr<IFunction> extendedRosenbrock = std::make_unique<ExtendedRosenbrockFunction>(size);
     testUtilAlg.runTest(*extendedRosenbrock.get());
@@ -33,7 +30,7 @@ int main(int argc, char* argv[])
     std::unique_ptr<IFunction> quadraticFunction = std::make_unique<QuadraticFunction>(size);
     testUtilAlg.runTest(*quadraticFunction.get());
 
-    std::unique_ptr<IFunction> powerSingularFunction = std::make_unique<PowerSingularFunction>(size);
+    std::unique_ptr<IFunction> powerSingularFunction = std::make_unique<PowellSingularFunction>(size);
     testUtilAlg.runTest(*powerSingularFunction.get());
 
     return 0;

@@ -1,6 +1,0 @@
-[submodule "libs/LBFGSpp"]
-	path = libs/LBFGSpp
-	url = git@github.com:yixuan/LBFGSpp.git
-[submodule "libs/eigen"]
-	path = libs/eigen
-	url = git@github.com:libigl/eigen.git
