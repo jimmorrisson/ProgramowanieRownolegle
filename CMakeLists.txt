@@ -27,7 +27,6 @@ endif()
 set(SOURCES
     main.cpp
     BFGSolver.cpp
-    LBFGSExampleRosenbrock.cpp
     IFunction.cpp
     PowerSingularFunction.cpp
     )

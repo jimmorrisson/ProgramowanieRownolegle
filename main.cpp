@@ -1,6 +1,5 @@
 #include <climits>
 #include <cmath>
-#include "LBFGSExampleRosenbrock.h"
 #include "ExtendedRosenbrockFunction.h"
 #include "QuadraticFunction.h"
 #include "PowerSingularFunction.h"
@@ -24,8 +23,6 @@ int main(int argc, char* argv[])
     }
     char *p;
     int size = strtol(argv[1], &p, 10);    
-    std::unique_ptr<IFunction> exampleRosenbrock = std::make_unique<LBFGSExampleRosenbrock>(size);
-    testUtilAlg.runTest(*exampleRosenbrock.get());
 
     std::unique_ptr<IFunction> extendedRosenbrock = std::make_unique<ExtendedRosenbrockFunction>(size);
     testUtilAlg.runTest(*extendedRosenbrock.get());
