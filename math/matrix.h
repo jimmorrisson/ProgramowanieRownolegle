@@ -26,9 +26,6 @@ namespace math
                 {
                     if (row == col)
                     {
-#ifdef USE_PARALLEL_PROG
-#pragma omp atomic write
-#endif
                         matrix.at(row, col) = 1.0;
                     }
                 }
@@ -50,9 +47,6 @@ namespace math
                 arr[row] = std::move(oneDimArr);
                 for (std::size_t col = 0; col < cols; col++)
                 {
-#ifdef USE_PARALLEL_PROG
-#pragma omp atomic write
-#endif
                     at(row, col) = matrix.at_r(row, col);
                 }
             }
@@ -89,9 +83,6 @@ namespace math
 #endif
             for (std::size_t i = 0; i < vector.getSize(); i++)
             {
-#ifdef USE_PARALLEL_PROG
-#pragma omp atomic write
-#endif
                 ret.at(0, i) = vector.at_r(i);
             }
             return Matrix(std::move(ret));

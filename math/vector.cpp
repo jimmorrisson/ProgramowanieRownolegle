@@ -11,9 +11,6 @@ namespace math
 #endif
         for (std::size_t i = 0; i < size; i++)
         {
-#ifdef USE_PARALLEL_PROG
-#pragma omp atomic write
-#endif
             arr[i] = value;
         }
     }
@@ -25,9 +22,6 @@ namespace math
 #endif
         for (std::size_t i = 0; i < size; i++)
         {
-#ifdef USE_PARALLEL_PROG
-#pragma omp atomic write
-#endif
             arr[i] = vector.arr[i];
         }
     }
@@ -48,9 +42,6 @@ namespace math
 #endif
         for (std::size_t i = 0; i < rhs.size; i++)
         {
-#ifdef USE_PARALLEL_PROG
-#pragma omp atomic update
-#endif
             ret.at(i) *= lhs;
         }
         return Vector(std::move(ret));
@@ -65,9 +56,6 @@ namespace math
 #endif
         for (std::size_t i = 0; i < ret.size; i++)
         {
-#ifdef USE_PARALLEL_PROG
-#pragma omp atomic update
-#endif
             ret.at(i) -= rhs.at_r(i);
         }
         return Vector(std::move(ret));
@@ -82,9 +70,6 @@ namespace math
 #endif
         for (std::size_t i = 0; i < ret.size; i++)
         {
-#ifdef USE_PARALLEL_PROG
-#pragma omp atomic update
-#endif
             ret.at(i) += rhs.at_r(i);
         }
         return Vector(std::move(ret));
@@ -93,7 +78,10 @@ namespace math
     double operator*(const Vector &lhs, const Vector &rhs)
     {
         assert(lhs.size == rhs.size);
-        double ret = 0.;
+        double ret = 0.0;
+#ifdef USE_PARALLEL_PROG
+#pragma omp parallel for reduction(+:ret)
+#endif
         for (std::size_t i = 0; i < lhs.size; i++)
         {
             ret += (lhs.at_r(i) * rhs.at_r(i));
