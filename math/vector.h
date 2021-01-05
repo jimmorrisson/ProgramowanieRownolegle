@@ -22,6 +22,9 @@ namespace math
 #endif
             for (std::size_t i = 0; i < size; i++)
             {
+#ifdef USE_PARALLEL_PROG
+#pragma omp atomic write
+#endif
                 at(i) = vector.at_r(i);
             }
             return *this;
@@ -39,6 +42,9 @@ namespace math
 #endif
             for (std::size_t i = 0; i < size; i++)
             {
+#ifdef USE_PARALLEL_PROG
+#pragma omp atomic update
+#endif
                 arr[i] *= value;
             }
             return *this;
@@ -46,9 +52,6 @@ namespace math
 
         Vector &operator-()
         {
-#ifdef USE_PARALLEL_PROG
-#pragma omp parallel for
-#endif
             for (std::size_t i = 0; i < size; i++)
             {
                 arr[i] *= -1;
@@ -75,10 +78,13 @@ namespace math
         {
             double ret = 0.;
 #ifdef USE_PARALLEL_PROG
-#pragma omp parallel for reduction(+:ret)
+#pragma omp parallel for
 #endif
             for (std::size_t i = 0; i < size; i++)
             {
+#ifdef USE_PARALLEL_PROG
+#pragma omp atomic update
+#endif
                 ret += std::pow(arr[i], 2);
             }
             return std::sqrt(ret);

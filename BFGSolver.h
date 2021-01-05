@@ -15,5 +15,5 @@ private:
 public:
 	BFGSolver(double epsilon, int max_iterations);
 
-	int solve(IFunction &func, math::Vector &Xk, double &fx);
+	void solve(IFunction &func, math::Vector &Xk, double &fx);
 };

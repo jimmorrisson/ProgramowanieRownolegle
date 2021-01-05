@@ -27,8 +27,9 @@ endif()
 set(SOURCES
     main.cpp
     BFGSolver.cpp
+    LBFGSExampleRosenbrock.cpp
     IFunction.cpp
-    PowellSingularFunction.cpp
+    PowerSingularFunction.cpp
     )
 
 add_compile_definitions(PARALLEL_PROG)

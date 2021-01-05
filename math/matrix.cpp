@@ -13,6 +13,9 @@ namespace math
         for (std::size_t i = 0; i < rows; i++)
         {
             auto oneDimArr = std::make_unique<double[]>(cols);
+#ifdef USE_PARALLEL_PROG
+#pragma omp atomic write
+#endif
             arr[i] = std::move(oneDimArr);
         }
     }
@@ -28,9 +31,15 @@ namespace math
         for (std::size_t row = 0; row < rows; row++)
         {
             auto oneDimArr = std::make_unique<double[]>(cols);
+#ifdef USE_PARALLEL_PROG
+#pragma omp atomic write
+#endif
             arr[row] = std::move(oneDimArr);
             for (std::size_t col = 0; col < cols; col++)
             {
+#ifdef USE_PARALLEL_PROG
+#pragma omp atomic write
+#endif
                 at(row, col) = matrix.at_r(row, col);
             }
         }
@@ -58,6 +67,9 @@ namespace math
         {
             for (std::size_t col = 0; col < matrix.cols; col++)
             {
+#ifdef USE_PARALLEL_PROG
+#pragma omp atomic update
+#endif
                 ret.at(row, col) *= value;
             }
         }
@@ -112,6 +124,9 @@ namespace math
         {
             for (std::size_t col = 0; col < lhs.cols; col++)
             {
+#ifdef USE_PARALLEL_PROG
+#pragma omp atomic update
+#endif
                 ret.at(row, col) -= rhs.at_r(row, col);
             }
         }
@@ -120,7 +135,6 @@ namespace math
 
     Matrix operator*(const Matrix &lhs, const Matrix &rhs)
     {
-        // TODO: only one paraller for?
         assert(lhs.cols == rhs.rows);
         Matrix ret{lhs.rows, rhs.cols};
         auto getMultipliedValue = [&ret, &lhs, &rhs](const std::size_t row, const std::size_t col) {
@@ -171,6 +185,9 @@ namespace math
         {
             for (std::size_t col = 0; col < lhs.cols; col++)
             {
+#ifdef USE_PARALLEL_PROG
+#pragma omp atomic update
+#endif
                 ret.at(row, col) += rhs.at_r(row, col);
             }
         }
@@ -179,14 +196,26 @@ namespace math
 
     std::ostream &operator<<(std::ostream &out, const Matrix &matrix)
     {
+#ifdef USE_PARALLEL_PROG
+#pragma omp parallel for
+#endif
         for (std::size_t row = 0; row < matrix.rows; row++)
         {
             for (std::size_t col = 0; col < matrix.cols; col++)
             {
-                out << matrix.at_r(row, col) << " ";
+#ifdef USE_PARALLEL_PROG
+#pragma omp critical
+#endif
+                {
+                    out << matrix.at_r(row, col) << " ";
+                }
             }
-
-            out << std::endl;
+#ifdef USE_PARALLEL_PROG
+#pragma omp critical
+#endif
+            {
+                out << std::endl;
+            }
         }
         return out;
     }

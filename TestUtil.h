@@ -9,7 +9,7 @@ private:
 	double epsilon;
 	int max_iterations;
 
-	int solveBFGSImpl(IFunction& func, math::Vector& initialVector, double& fx)
+	void solveBFGSImpl(IFunction& func, math::Vector& initialVector, double& fx)
 	{
 		BFGSolver solver(epsilon, max_iterations);
 		return solver.solve(func, initialVector, fx);
@@ -22,19 +22,18 @@ public:
 	void runTest(IFunction& func)
 	{
 		std::cout << "<--------------STARTING TEST-------------->" << std::endl;
-		std::cout << func;
+		// std::cout << func;
 
 		auto initialVector = func.getInitialVector();
 		double fx;
 
 		// Running test
 		auto t1 = std::chrono::high_resolution_clock::now();
-		int iter = solveBFGSImpl(func, initialVector, fx);
+		solveBFGSImpl(func, initialVector, fx);
 		auto t2 = std::chrono::high_resolution_clock::now();
 		
-		std::cout << "x = " << initialVector;
-		std::cout << "min f(x) = " << fx << std::endl;
-		std::cout << "number of iterations = " << iter << std::endl;
+		// std::cout << "x = \n" << initialVector.format(Eigen::IOFormat(Eigen::FullPrecision, 0, " ", ", ", "", "")) << std::endl;
+		// std::cout << "f(x) = " << fx << std::endl;
 		std::cout << "Execution time: " 
 			<< std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count() 
 			<< " ms" << std::endl;

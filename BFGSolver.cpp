@@ -3,7 +3,6 @@
 #include <atomic>
 #include <cstdio>
 #include <matrix.h>
-#include <chrono>
 #ifdef USE_PARALLEL_PROG
 #include <omp.h>
 #endif
@@ -35,74 +34,89 @@ double BFGSolver::ArmijoBackTrack(IFunction &func,
     return alpha;
 }
 
-int BFGSolver::solve(IFunction &func, math::Vector &Xk, double &fx)
+void BFGSolver::solve(IFunction &func, math::Vector &Xk, double &fx)
 {
-// TODO: Output somewhere number of threads
-// #ifdef USE_PARALLEL_PROG
-//         // Only master thread should write to output
-//         if (omp_get_thread_num() == 0)
-//         {
-//             std::cout << "Number of threads = " << omp_get_num_threads() << std::endl;
-//         }
-// #else
-//         std::cout << "Number of threads = " << 1 << std::endl;
-// #endif
-
     // Step 1 init
     fx = 0;
     int size = func.size;
-    math::Matrix I = math::Matrix::identity(size);
-    math::Matrix Hk = math::Matrix::identity(size);
-    math::Vector gradXk(size);
 
-    for (int i = 1; i <= max_iterations; i++)
+    std::atomic<bool> go(true);
+    uint give = 0;
+#ifdef USE_PARALLEL_PROG
+#pragma omp parallel private(go) shared(Xk)
+#endif
     {
-        std::cout << "iteration = " << i << std::endl;
-
-        auto t1 = std::chrono::high_resolution_clock::now();
-        fx = func(Xk, gradXk);
-        auto t2 = std::chrono::high_resolution_clock::now();
-        std::cout << "grad: " << std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count() << " microsec" << std::endl;
-
-        t1 = std::chrono::high_resolution_clock::now();
-        double n = gradXk.norm();
-        t2 = std::chrono::high_resolution_clock::now();
-        std::cout << "norm: " << std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count() << " microsec" << std::endl;
-
-        if (n <= epsilon)
+        uint i;
+        uint stop;
+        math::Matrix I;
+        math::Matrix Hk;
+        math::Vector gradXk;
+#ifdef USE_PARALLEL_PROG
+#pragma omp critical
+#endif
         {
-            return i;
+#ifdef USE_PARALLEL_PROG
+            std::cout << "threads=" << omp_get_num_threads() << std::endl;
+#endif
+            i = give;
+#ifdef USE_PARALLEL_PROG
+            give += max_iterations / omp_get_num_threads();
+            go = true;
+#endif
+            stop = max_iterations;
+            const auto mIdentity = math::Matrix::identity(size);
+            const auto vectorZero = math::Vector(size);
+            I = mIdentity;
+            Hk = mIdentity;
+            gradXk = vectorZero;
+#ifdef USE_PARALLEL_PROG
+            if (omp_get_thread_num() == omp_get_num_threads() - 1)
+                stop = max_iterations;
+#endif
         }
 
-        // Step 2 search direction
-        t1 = std::chrono::high_resolution_clock::now();
-        math::Vector Dk = math::Matrix::add_inv(Hk) * gradXk;
-        t2 = std::chrono::high_resolution_clock::now();
-        std::cout << "Dk: " << std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count() << " microsec" << std::endl;
+        while (i < stop && go)
+        {
+            fx = func(Xk, gradXk);
 
-        // Step 3 step length using Armijo rule
-        math::Vector Xk1(size);
-        math::Vector gradXk1(size);
-        t1 = std::chrono::high_resolution_clock::now();
-        double step = ArmijoBackTrack(func, fx, Xk, gradXk, Dk, Xk1, gradXk1, 1, 0.2, 0.0001);
-        t2 = std::chrono::high_resolution_clock::now();
-        std::cout << "Armijo: " << std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count() << " microsec" << std::endl;
+            double n = gradXk.norm();
+            // printf("N: %f\n", n);
 
-        // Step 4 matrix Hk+1
-        const auto Sk = step * Dk;
-        auto Yk = gradXk1 - gradXk;
-        const auto Yk_trans = math::Matrix::transpose(Yk);
-        const auto Sk_trans = math::Matrix::transpose(Sk);
-        double hC = 1 / (Yk_trans * Sk).to_scalar();
-        
-        std::cout << "Hk+1 start" << std::endl;
-        t1 = std::chrono::high_resolution_clock::now();
-        Hk = ((I - hC * (Sk * Yk_trans).to_scalar()) * Hk * (I - hC * (Yk * Sk_trans).to_scalar()) + hC * (Sk * Sk_trans).to_scalar());
-        t2 = std::chrono::high_resolution_clock::now();
-        std::cout << "Hk+1 duration: " << std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count() << " microsec" << std::endl;
+            if (n <= epsilon)
+            {
+                go = false;
+            }
 
-        Xk = Xk1;
+            // Step 2 search direction
+            math::Vector Dk = math::Matrix::add_inv(Hk) * gradXk;
+
+            // Step 3 step length using Armijo rule
+            math::Vector Xk1(size);
+            math::Vector gradXk1(size);
+            double step{};
+#ifdef USE_PARALLEL_PROG
+#pragma omp atomic write
+#endif
+            step = ArmijoBackTrack(func, fx, Xk, gradXk, Dk, Xk1, gradXk1, 1, 0.2, 0.0001);
+
+            // Step 4 matrix Hk+1
+            const auto Sk = step * Dk;
+            auto Yk = gradXk1 - gradXk;
+            const auto Yk_trans = math::Matrix::transpose(Yk);
+            const auto Sk_trans = math::Matrix::transpose(Sk);
+            double hC = 1 / (Yk_trans * Sk).to_scalar();
+            const auto new_Hk = ((I - hC * (Sk * Yk_trans).to_scalar()) * Hk * (I - hC * (Yk * Sk_trans).to_scalar()) + hC * (Sk * Sk_trans).to_scalar());
+#ifdef USE_PARALLEL_PROG
+#pragma omp critical
+#endif
+            {
+                Hk = new_Hk;
+                Xk = Xk1;
+            }
+            i++;
+        }
     }
-
-    return INT32_MAX;
+#ifdef USE_PARALLEL_PROG
+#pragma omp barrier
+#endif
 }
