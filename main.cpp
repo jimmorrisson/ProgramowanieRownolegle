@@ -1,53 +1,40 @@
+#include <climits>
+#include <cmath>
+#include "LBFGSExampleRosenbrock.h"
+#include "ExtendedRosenbrockFunction.h"
+#include "QuadraticFunction.h"
+#include "PowerSingularFunction.h"
+#include "TestUtil.h"
+#include <memory>
 #include <iostream>
-#include <Eigen/Core>
-// #include "libs/LBFGSpp/include/LBFGS.h"
-#include <LBFGS.h>
- 
-using Eigen::VectorXd;
-using namespace LBFGSpp;
- 
-class Rosenbrock
-{
-private:
-    int n;
-public:
-    Rosenbrock(int n_) : n(n_) {}
-    double operator()(const VectorXd& x, VectorXd& grad)
-    {
-        double fx = 0.0;
-        for(int i = 0; i < n; i += 2)
-        {
-            double t1 = 1.0 - x[i];
-            double t2 = 10 * (x[i + 1] - x[i] * x[i]);
-            grad[i + 1] = 20 * t2;
-            grad[i]     = -2.0 * (x[i] * grad[i + 1] + t1);
-            fx += t1 * t1 + t2 * t2;
-        }
-        return fx;
-    }
-};
+#include <vector.h>
+#include <matrix.h>
 
-int main()
+int main(int argc, char* argv[])
 {
-    const int n = 10;
-    // Set up parameters
-    LBFGSParam<double> param;
-    param.epsilon = 1e-6;
-    param.max_iterations = 100;
- 
-    // Create solver and function object
-    LBFGSSolver<double, LineSearchBracketing> solver(param);
-    Rosenbrock fun(n);
- 
-    // Initial guess
-    VectorXd x = VectorXd::Zero(n);
-    // x will be overwritten to be the best point found
-    double fx;
-    int niter = solver.minimize(fun, x, fx);
- 
-    std::cout << niter << " iterations" << std::endl;
-    std::cout << "x = \n" << x.transpose() << std::endl;
-    std::cout << "f(x) = " << fx << std::endl;
- 
+    TestUtil testUtilAlg(0.01, INT_MAX);
+
+
+    if (argc != 2) {
+        std::cout << "Invalid number of arguments \n"
+                  << "Program usage : \n"
+                  << "./ParallelProgramming %n \n"
+                  << "n - size \n";
+        return -1;
+    }
+    char *p;
+    int size = strtol(argv[1], &p, 10);    
+    std::unique_ptr<IFunction> exampleRosenbrock = std::make_unique<LBFGSExampleRosenbrock>(size);
+    testUtilAlg.runTest(*exampleRosenbrock.get());
+
+    std::unique_ptr<IFunction> extendedRosenbrock = std::make_unique<ExtendedRosenbrockFunction>(size);
+    testUtilAlg.runTest(*extendedRosenbrock.get());
+
+    std::unique_ptr<IFunction> quadraticFunction = std::make_unique<QuadraticFunction>(size);
+    testUtilAlg.runTest(*quadraticFunction.get());
+
+    std::unique_ptr<IFunction> powerSingularFunction = std::make_unique<PowerSingularFunction>(size);
+    testUtilAlg.runTest(*powerSingularFunction.get());
+
     return 0;
 }
