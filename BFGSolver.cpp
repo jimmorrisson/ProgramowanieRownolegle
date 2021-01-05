@@ -3,6 +3,7 @@
 #include <atomic>
 #include <cstdio>
 #include <matrix.h>
+#include <chrono>
 #ifdef USE_PARALLEL_PROG
 #include <omp.h>
 #endif
@@ -34,7 +35,7 @@ double BFGSolver::ArmijoBackTrack(IFunction &func,
     return alpha;
 }
 
-void BFGSolver::solve(IFunction &func, math::Vector &Xk, double &fx)
+int BFGSolver::solve(IFunction &func, math::Vector &Xk, double &fx)
 {
 // TODO: Output somewhere number of threads
 // #ifdef USE_PARALLEL_PROG
@@ -54,24 +55,38 @@ void BFGSolver::solve(IFunction &func, math::Vector &Xk, double &fx)
     math::Matrix Hk = math::Matrix::identity(size);
     math::Vector gradXk(size);
 
-    for (int i = 0; i < max_iterations; i++)
+    for (int i = 1; i <= max_iterations; i++)
     {
-        fx = func(Xk, gradXk);
+        std::cout << "iteration = " << i << std::endl;
 
+        auto t1 = std::chrono::high_resolution_clock::now();
+        fx = func(Xk, gradXk);
+        auto t2 = std::chrono::high_resolution_clock::now();
+        std::cout << "grad: " << std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count() << " microsec" << std::endl;
+
+        t1 = std::chrono::high_resolution_clock::now();
         double n = gradXk.norm();
+        t2 = std::chrono::high_resolution_clock::now();
+        std::cout << "norm: " << std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count() << " microsec" << std::endl;
 
         if (n <= epsilon)
         {
-            return;
+            return i;
         }
 
         // Step 2 search direction
+        t1 = std::chrono::high_resolution_clock::now();
         math::Vector Dk = math::Matrix::add_inv(Hk) * gradXk;
+        t2 = std::chrono::high_resolution_clock::now();
+        std::cout << "Dk: " << std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count() << " microsec" << std::endl;
 
         // Step 3 step length using Armijo rule
         math::Vector Xk1(size);
         math::Vector gradXk1(size);
+        t1 = std::chrono::high_resolution_clock::now();
         double step = ArmijoBackTrack(func, fx, Xk, gradXk, Dk, Xk1, gradXk1, 1, 0.2, 0.0001);
+        t2 = std::chrono::high_resolution_clock::now();
+        std::cout << "Armijo: " << std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count() << " microsec" << std::endl;
 
         // Step 4 matrix Hk+1
         const auto Sk = step * Dk;
@@ -79,8 +94,15 @@ void BFGSolver::solve(IFunction &func, math::Vector &Xk, double &fx)
         const auto Yk_trans = math::Matrix::transpose(Yk);
         const auto Sk_trans = math::Matrix::transpose(Sk);
         double hC = 1 / (Yk_trans * Sk).to_scalar();
-        Hk = ((I - hC * (Sk * Yk_trans).to_scalar()) * Hk * (I - hC * (Yk * Sk_trans).to_scalar()) + hC * (Sk * Sk_trans).to_scalar());
         
+        std::cout << "Hk+1 start" << std::endl;
+        t1 = std::chrono::high_resolution_clock::now();
+        Hk = ((I - hC * (Sk * Yk_trans).to_scalar()) * Hk * (I - hC * (Yk * Sk_trans).to_scalar()) + hC * (Sk * Sk_trans).to_scalar());
+        t2 = std::chrono::high_resolution_clock::now();
+        std::cout << "Hk+1 duration: " << std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count() << " microsec" << std::endl;
+
         Xk = Xk1;
     }
+
+    return INT32_MAX;
 }

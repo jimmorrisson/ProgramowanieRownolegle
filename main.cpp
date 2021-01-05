@@ -24,14 +24,14 @@ int main(int argc, char* argv[])
     char *p;
     int size = strtol(argv[1], &p, 10);
 
-    std::unique_ptr<IFunction> extendedRosenbrock = std::make_unique<ExtendedRosenbrockFunction>(size);
-    testUtilAlg.runTest(*extendedRosenbrock.get());
+    // std::unique_ptr<IFunction> extendedRosenbrock = std::make_unique<ExtendedRosenbrockFunction>(size);
+    // testUtilAlg.runTest(*extendedRosenbrock.get());
 
     std::unique_ptr<IFunction> quadraticFunction = std::make_unique<QuadraticFunction>(size);
     testUtilAlg.runTest(*quadraticFunction.get());
 
-    std::unique_ptr<IFunction> powerSingularFunction = std::make_unique<PowellSingularFunction>(size);
-    testUtilAlg.runTest(*powerSingularFunction.get());
+    // std::unique_ptr<IFunction> powerSingularFunction = std::make_unique<PowellSingularFunction>(size);
+    // testUtilAlg.runTest(*powerSingularFunction.get());
 
     return 0;
 }
