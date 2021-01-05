@@ -2,7 +2,7 @@
 #include <cmath>
 #include "ExtendedRosenbrockFunction.h"
 #include "QuadraticFunction.h"
-#include "PowerSingularFunction.h"
+#include "PowellSingularFunction.h"
 #include "TestUtil.h"
 #include <memory>
 #include <iostream>
@@ -30,7 +30,7 @@ int main(int argc, char* argv[])
     std::unique_ptr<IFunction> quadraticFunction = std::make_unique<QuadraticFunction>(size);
     testUtilAlg.runTest(*quadraticFunction.get());
 
-    std::unique_ptr<IFunction> powerSingularFunction = std::make_unique<PowerSingularFunction>(size);
+    std::unique_ptr<IFunction> powerSingularFunction = std::make_unique<PowellSingularFunction>(size);
     testUtilAlg.runTest(*powerSingularFunction.get());
 
     return 0;

@@ -28,7 +28,7 @@ set(SOURCES
     main.cpp
     BFGSolver.cpp
     IFunction.cpp
-    PowerSingularFunction.cpp
+    PowellSingularFunction.cpp
     )
 
 add_compile_definitions(PARALLEL_PROG)

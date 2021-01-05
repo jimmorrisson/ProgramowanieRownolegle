@@ -94,8 +94,15 @@ namespace math
     {
         assert(lhs.size == rhs.size);
         double ret = 0.;
+#ifdef USE_PARALLEL_PROG
+#pragma omp parallel for
+#endif
+
         for (std::size_t i = 0; i < lhs.size; i++)
         {
+#ifdef USE_PARALLEL_PROG
+#pragma omp atomic update
+#endif
             ret += (lhs.at_r(i) * rhs.at_r(i));
         }
         return ret;
@@ -103,17 +110,9 @@ namespace math
 
     std::ostream &operator<<(std::ostream &out, const Vector &vec)
     {
-#ifdef USE_PARALLEL_PROG
-#pragma omp parallel for
-#endif
         for (std::size_t i = 0; i < vec.size; i++)
         {
-#ifdef USE_PARALLEL_PROG
-#pragma omp critical
-#endif
-            {
-                out << vec.at_r(i) << std::endl;
-            }
+            out << vec.at_r(i) << std::endl;
         }
 
         return out;
