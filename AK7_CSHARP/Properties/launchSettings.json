@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "AK7_CSHARP": {
+      "commandName": "Project",
+      "commandLineArgs": "240 8"
+    }
+  }
+}
