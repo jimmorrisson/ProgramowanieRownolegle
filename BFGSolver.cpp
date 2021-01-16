@@ -4,6 +4,8 @@
 #include <cstdio>
 #include <matrix.h>
 
+typedef unsigned int uint;
+
 BFGSolver::BFGSolver(double epsilon, int max_iterations) : epsilon(epsilon), max_iterations(max_iterations)
 {
 }
