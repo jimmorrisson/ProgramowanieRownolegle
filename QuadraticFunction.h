@@ -17,9 +17,6 @@ public:
         fx += 101 * pow(x.at_r(1), 2);
         grad.at(1) = 202 * x.at_r(1);
 
-#ifdef USE_PARALLEL_PROG
-#pragma omp parallel for reduction(+:fx)
-#endif
         for (int i = 2; i <= size - 3; i++)
         {
             fx += 201 * pow(x.at_r(i), 2);

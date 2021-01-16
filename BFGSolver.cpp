@@ -3,9 +3,6 @@
 #include <atomic>
 #include <cstdio>
 #include <matrix.h>
-#ifdef USE_PARALLEL_PROG
-#include <omp.h>
-#endif
 
 BFGSolver::BFGSolver(double epsilon, int max_iterations) : epsilon(epsilon), max_iterations(max_iterations)
 {
@@ -42,43 +39,20 @@ void BFGSolver::solve(IFunction &func, math::Vector &Xk, double &fx)
 
     std::atomic<bool> go(true);
     uint give = 0;
-#ifdef USE_PARALLEL_PROG
-#pragma omp parallel private(go) shared(Xk)
-#endif
     {
-#ifdef USE_PARALLEL_PROG
-        // Only master thread should write to output
-        if (omp_get_thread_num() == 0)
-        {
-            std::cout << "Number of threads = " << omp_get_num_threads() << std::endl;
-        }
-#else
-        std::cout << "Number of threads = " << 1 << std::endl;
-#endif
         uint i;
         uint stop;
         math::Matrix I;
         math::Matrix Hk;
         math::Vector gradXk;
-#ifdef USE_PARALLEL_PROG
-#pragma omp critical
-#endif
         {
             i = give;
-#ifdef USE_PARALLEL_PROG
-            give += max_iterations / omp_get_num_threads();
-            go = true;
-#endif
             stop = max_iterations;
             const auto mIdentity = math::Matrix::identity(size);
             const auto vectorZero = math::Vector(size);
             I = mIdentity;
             Hk = mIdentity;
             gradXk = vectorZero;
-#ifdef USE_PARALLEL_PROG
-            if (omp_get_thread_num() == omp_get_num_threads() - 1)
-                stop = max_iterations;
-#endif
         }
 
         while (i < stop && go)
@@ -99,9 +73,6 @@ void BFGSolver::solve(IFunction &func, math::Vector &Xk, double &fx)
             math::Vector Xk1(size);
             math::Vector gradXk1(size);
             double step{};
-#ifdef USE_PARALLEL_PROG
-#pragma omp atomic write
-#endif
             step = ArmijoBackTrack(func, fx, Xk, gradXk, Dk, Xk1, gradXk1, 1, 0.2, 0.0001);
 
             // Step 4 matrix Hk+1
@@ -111,9 +82,6 @@ void BFGSolver::solve(IFunction &func, math::Vector &Xk, double &fx)
             const auto Sk_trans = math::Matrix::transpose(Sk);
             double hC = 1 / (Yk_trans * Sk).to_scalar();
             const auto new_Hk = ((I - hC * (Sk * Yk_trans).to_scalar()) * Hk * (I - hC * (Yk * Sk_trans).to_scalar()) + hC * (Sk * Sk_trans).to_scalar());
-#ifdef USE_PARALLEL_PROG
-#pragma omp critical
-#endif
             {
                 Hk = new_Hk;
                 Xk = Xk1;
@@ -121,7 +89,4 @@ void BFGSolver::solve(IFunction &func, math::Vector &Xk, double &fx)
             i++;
         }
     }
-#ifdef USE_PARALLEL_PROG
-#pragma omp barrier
-#endif
 }

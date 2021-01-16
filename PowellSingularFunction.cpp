@@ -22,9 +22,6 @@ math::Vector PowellSingularFunction::prepareInitialVector(int size)
 double PowellSingularFunction::operator()(const math::Vector& x, math::Vector& grad)
 {
     double fx = 0.0;
-#ifdef USE_PARALLEL_PROG
-#pragma omp parallel for reduction(+:fx)
-#endif
     for (int i = 3; i < size; i += 4)
     {
         double a = x.at_r(i - 3);

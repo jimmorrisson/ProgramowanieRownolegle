@@ -17,9 +17,6 @@ namespace math
         static Matrix identity(const std::size_t size)
         {
             Matrix matrix(size, size);
-#ifdef USE_PARALLEL_PROG
-#pragma omp parallel for
-#endif
             for (std::size_t row = 0; row < size; row++)
             {
                 for (std::size_t col = 0; col < size; col++)
@@ -38,9 +35,6 @@ namespace math
             arr = std::make_unique<std::unique_ptr<double[]>[]>(matrix.rows);
             rows = matrix.rows;
             cols = matrix.cols;
-#ifdef USE_PARALLEL_PROG
-#pragma omp parallel for
-#endif
             for (std::size_t row = 0; row < rows; row++)
             {
                 auto oneDimArr = std::make_unique<double[]>(cols);
@@ -78,9 +72,6 @@ namespace math
         static Matrix transpose(const Vector &vector)
         {
             Matrix ret{1, vector.getSize()};
-#ifdef USE_PARALLEL_PROG
-#pragma omp parallel for
-#endif
             for (std::size_t i = 0; i < vector.getSize(); i++)
             {
                 ret.at(0, i) = vector.at_r(i);
@@ -101,16 +92,10 @@ namespace math
         static Matrix add_inv(const Matrix &matrix)
         {
             Matrix ret{matrix};
-#ifdef USE_PARALLEL_PROG
-#pragma omp parallel for
-#endif
             for (std::size_t row = 0; row < matrix.rows; row++)
             {
                 for (std::size_t col = 0; col < matrix.cols; col++)
                 {
-#ifdef USE_PARALLEL_PROG
-#pragma omp atomic update
-#endif
                     ret.at(row, col) *= -1;
                 }
             }

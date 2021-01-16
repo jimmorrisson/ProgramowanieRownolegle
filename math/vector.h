@@ -17,9 +17,6 @@ namespace math
         {
             arr = std::make_unique<double[]>(vector.size);
             size = vector.size;
-#ifdef USE_PARALLEL_PROG
-#pragma omp parallel for
-#endif
             for (std::size_t i = 0; i < size; i++)
             {
                 at(i) = vector.at_r(i);
@@ -34,9 +31,6 @@ namespace math
 
         Vector &operator*=(double value)
         {
-#ifdef USE_PARALLEL_PROG
-#pragma omp parallel for
-#endif
             for (std::size_t i = 0; i < size; i++)
             {
                 arr[i] *= value;
@@ -46,9 +40,6 @@ namespace math
 
         Vector &operator-()
         {
-#ifdef USE_PARALLEL_PROG
-#pragma omp parallel for
-#endif
             for (std::size_t i = 0; i < size; i++)
             {
                 arr[i] *= -1;
@@ -74,9 +65,6 @@ namespace math
         double norm() const noexcept
         {
             double ret = 0.;
-#ifdef USE_PARALLEL_PROG
-#pragma omp parallel for reduction(+:ret)
-#endif
             for (std::size_t i = 0; i < size; i++)
             {
                 ret += std::pow(arr[i], 2);

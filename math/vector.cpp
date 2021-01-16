@@ -6,9 +6,6 @@ namespace math
 {
     Vector::Vector(const std::size_t size, const double value) : arr{std::make_unique<double[]>(size)}, size{size}
     {
-#ifdef USE_PARALLEL_PROG
-#pragma omp parallel for
-#endif
         for (std::size_t i = 0; i < size; i++)
         {
             arr[i] = value;
@@ -17,9 +14,6 @@ namespace math
 
     Vector::Vector(const Vector &vector) : arr{std::make_unique<double[]>(vector.size)}, size{vector.size}
     {
-#ifdef USE_PARALLEL_PROG
-#pragma omp parallel for
-#endif
         for (std::size_t i = 0; i < size; i++)
         {
             arr[i] = vector.arr[i];
@@ -37,9 +31,6 @@ namespace math
     Vector operator*(double lhs, const Vector &rhs)
     {
         Vector ret(rhs);
-#ifdef USE_PARALLEL_PROG
-#pragma omp parallel for
-#endif
         for (std::size_t i = 0; i < rhs.size; i++)
         {
             ret.at(i) *= lhs;
@@ -51,9 +42,6 @@ namespace math
     {
         assert(lhs.size == rhs.size);
         Vector ret(lhs);
-#ifdef USE_PARALLEL_PROG
-#pragma omp parallel for
-#endif
         for (std::size_t i = 0; i < ret.size; i++)
         {
             ret.at(i) -= rhs.at_r(i);
@@ -65,9 +53,6 @@ namespace math
     {
         assert(lhs.size == rhs.size);
         Vector ret(lhs);
-#ifdef USE_PARALLEL_PROG
-#pragma omp parallel for
-#endif
         for (std::size_t i = 0; i < ret.size; i++)
         {
             ret.at(i) += rhs.at_r(i);
@@ -79,9 +64,6 @@ namespace math
     {
         assert(lhs.size == rhs.size);
         double ret = 0.0;
-#ifdef USE_PARALLEL_PROG
-#pragma omp parallel for reduction(+:ret)
-#endif
         for (std::size_t i = 0; i < lhs.size; i++)
         {
             ret += (lhs.at_r(i) * rhs.at_r(i));
