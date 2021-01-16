@@ -2,7 +2,7 @@
 #include "IFunction.h"
 #include <atomic>
 #include <cstdio>
-#include <matrix.h>
+#include "matrix.h"
 
 typedef unsigned int uint;
 

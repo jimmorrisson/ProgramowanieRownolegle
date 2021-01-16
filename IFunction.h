@@ -1,8 +1,8 @@
 #pragma once
 #include <iostream>
 #include <iomanip>
-#include <matrix.h>
-#include <vector.h>
+#include "matrix.h"
+#include "vector.h"
 
 class IFunction
 {

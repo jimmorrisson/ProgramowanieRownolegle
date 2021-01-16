@@ -1,6 +1,6 @@
 #pragma once
-#include <vector.h>
-class IFunction;
+#include "vector.h"
+#include "IFunction.h"
 
 class BFGSolver
 {

@@ -8,8 +8,8 @@
 #include <memory>
 #include <iostream>
 #include <vector>
-#include <vector.h>
-#include <matrix.h>
+#include "vector.h"
+#include "matrix.h"
 #ifdef USE_PARALLEL_PROG
 #include <mpi.h>
 #endif

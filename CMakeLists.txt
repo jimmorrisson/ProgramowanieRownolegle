@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.10)
 project(ParallelProgramming)
 
-include_directories(math/)
+#include_directories(math/)
 
-add_subdirectory(math/)
+#add_subdirectory(math/)
 
 set (CMAKE_CXX_STANDARD 17)
 option(WITH_OPEN_MPI "Option description" ON)
@@ -31,13 +31,15 @@ set(SOURCES
     BFGSolver.cpp
     IFunction.cpp
     PowellSingularFunction.cpp
+    vector.cpp
+    matrix.cpp
     )
 
 add_compile_definitions(PARALLEL_PROG)
 add_executable(${CMAKE_PROJECT_NAME} ${SOURCES} ${HEADERS})
 
 if (WIN32 AND WITH_OPEN_MPI)
-  target_link_libraries(${CMAKE_PROJECT_NAME} math msmpi)
+  target_link_libraries(${CMAKE_PROJECT_NAME} msmpi)
 else()
-  target_link_libraries(${CMAKE_PROJECT_NAME} math)
+  target_link_libraries(${CMAKE_PROJECT_NAME})
 endif()

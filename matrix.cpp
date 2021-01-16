@@ -1,6 +1,10 @@
 #include "matrix.h"
 #include <cassert>
 
+#ifdef USE_PARALLEL_PROG
+#include <mpi.h>
+#endif
+
 namespace math
 {
     Matrix::Matrix(const std::size_t rows, const std::size_t cols) : arr{std::make_unique<std::unique_ptr<double[]>[]>(rows)},
