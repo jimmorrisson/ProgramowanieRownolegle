@@ -38,15 +38,6 @@ namespace math
             return *this;
         }
 
-        Vector &operator-()
-        {
-            for (std::size_t i = 0; i < size; i++)
-            {
-                arr[i] *= -1;
-            }
-            return *this;
-        }
-
         double &at(const std::size_t i)
         {
             return arr[i];
@@ -80,9 +71,9 @@ namespace math
 
         friend std::ostream &operator<<(std::ostream &out, const Vector &vec);
         friend Vector operator*(double lhs, const Vector &rhs);
+        friend Vector operator-(const Vector& lhs);
+        friend Vector operator+(const Vector& lhs, const Vector& rhs);
         friend Vector operator-(const Vector &lhs, const Vector &rhs);
-        friend Vector operator+(const Vector &lhs, const Vector &rhs);
-        friend double operator*(const Vector &lhs, const Vector &rhs);
 
     private:
         std::unique_ptr<double[]> arr;

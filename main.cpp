@@ -50,7 +50,8 @@ int main(int argc, char *argv[])
     const std::vector<IFunction *> functions = {
         extendedRosenbrock.get(),
         quadraticFunction.get(),
-        powellSingularFunction.get()};
+        powellSingularFunction.get()
+    };
 
 #ifdef USE_PARALLEL_PROG
     if (rank == 0)

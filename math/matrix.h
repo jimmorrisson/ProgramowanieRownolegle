@@ -11,23 +11,18 @@ namespace math
     public:
         explicit Matrix(const std::size_t rows, const std::size_t cols);
         explicit Matrix(const Matrix &matrix);
+        explicit Matrix(const Vector& vector);
         explicit Matrix(Matrix &&matrix);
         Matrix();
 
         static Matrix identity(const std::size_t size)
         {
-            Matrix matrix(size, size);
+            Matrix ret(size, size);
             for (std::size_t row = 0; row < size; row++)
             {
-                for (std::size_t col = 0; col < size; col++)
-                {
-                    if (row == col)
-                    {
-                        matrix.at(row, col) = 1.0;
-                    }
-                }
+                ret.at(row, row) = 1.0;
             }
-            return Matrix(std::move(matrix));
+            return Matrix(std::move(ret));
         }
 
         Matrix &operator=(const Matrix &matrix)
@@ -81,26 +76,11 @@ namespace math
 
         friend Matrix operator*(const Matrix &matrix, const double value);
         friend Matrix operator*(const double value, const Matrix &matrix);
-        friend Vector operator*(const Vector &vector, const Matrix &matrix);
         friend Vector operator*(const Matrix &matrix, const Vector &vector);
-        friend Matrix operator-(const Matrix &matrix, const double value);
+        friend Matrix operator+(const Matrix& lhs, const Matrix& rhs);
         friend Matrix operator-(const Matrix &lhs, const Matrix &rhs);
-        friend Matrix operator*(const Matrix &lhs, const Matrix &rhs);
-        friend Matrix operator+(const Matrix &matrix, const double value);
-        friend Matrix operator+(const Matrix &lhs, const Matrix &rhs);
+        friend Matrix operator*(const Matrix& lhs, const Matrix& rhs);
         friend std::ostream &operator<<(std::ostream &out, const Matrix &matrix);
-        static Matrix add_inv(const Matrix &matrix)
-        {
-            Matrix ret{matrix};
-            for (std::size_t row = 0; row < matrix.rows; row++)
-            {
-                for (std::size_t col = 0; col < matrix.cols; col++)
-                {
-                    ret.at(row, col) *= -1;
-                }
-            }
-            return Matrix(std::move(ret));
-        }
 
     private:
         std::unique_ptr<std::unique_ptr<double[]>[]> arr;

@@ -13,16 +13,22 @@ BFGSolver::BFGSolver(double epsilon, int max_iterations) : epsilon(epsilon), max
 double BFGSolver::ArmijoBackTrack(IFunction &func,
                                   double fXk, math::Vector &Xk, math::Vector &gradXk,
                                   math::Vector &Dk, math::Vector &Xk1, math::Vector &gradXk1, double &&alpha,
-                                  const double alphaCoeff, const double delta) const
+                                  const double alphaCoeff, const double c1, const double c2) const
 {
-    const double armijoCoeff = delta * (math::Matrix::transpose(gradXk) * Dk).to_scalar();
+	math::Matrix Dk_trans = math::Matrix::transpose(Dk);
+	double condCoeff = (Dk_trans * gradXk).to_scalar();
+	double armijoCoeff = c1 * condCoeff;
+	double curvatureCoeff = -c2 * condCoeff;
+
     while (true)
     {
         Xk1 = Xk + alpha * Dk;
-        const double fXk1 = func(Xk1, gradXk1);
-        const double armijoCond = fXk + alpha * armijoCoeff;
+        double fXk1 = func(Xk1, gradXk1);
 
-        if (fXk1 <= armijoCond)
+        double armijoCond = fXk + alpha * armijoCoeff;
+		double curvatureCond = -((Dk_trans * gradXk1).to_scalar());
+
+		if (fXk1 <= armijoCond && curvatureCond <= curvatureCoeff)
         {
             return alpha;
         }
@@ -33,62 +39,47 @@ double BFGSolver::ArmijoBackTrack(IFunction &func,
     return alpha;
 }
 
-void BFGSolver::solve(IFunction &func, math::Vector &Xk, double &fx)
+void BFGSolver::solve(IFunction& func, math::Vector& Xk, double& fx)
 {
-    // Step 1 init
-    fx = 0;
-    int size = func.size;
+	// Step 1 init
+	fx = 0;
+	int size = func.size;
 
-    std::atomic<bool> go(true);
-    uint give = 0;
-    {
-        uint i;
-        uint stop;
-        math::Matrix I;
-        math::Matrix Hk;
-        math::Vector gradXk;
-        {
-            i = give;
-            stop = max_iterations;
-            const auto mIdentity = math::Matrix::identity(size);
-            const auto vectorZero = math::Vector(size);
-            I = mIdentity;
-            Hk = mIdentity;
-            gradXk = vectorZero;
-        }
+	math::Matrix I = math::Matrix::identity(size);
+	math::Matrix Hk = math::Matrix::identity(size);
+	math::Vector gradXk = math::Vector(size);
 
-        while (i < stop && go)
-        {
-            fx = func(Xk, gradXk);
+	for (int i = 1; i <= max_iterations; i++)
+	{
+		fx = func(Xk, gradXk);
 
-            double n = gradXk.norm();
+		double n = gradXk.norm();
 
-            if (n <= epsilon)
-            {
-                go = false;
-            }
+		if (n <= epsilon)
+		{
+			std::cout << "Number of iterations: " << i << std::endl;
+			break;
+		}
 
-            // Step 2 search direction
-            math::Vector Dk = math::Matrix::add_inv(Hk) * gradXk;
+		// Step 2 search direction
+		math::Vector Dk = -(Hk * gradXk);
 
-            // Step 3 step length using Armijo rule
-            math::Vector Xk1(size);
-            math::Vector gradXk1(size);
-            double step{};
-            step = ArmijoBackTrack(func, fx, Xk, gradXk, Dk, Xk1, gradXk1, 1, 0.2, 0.0001);
+		// Step 3 step length using Armijo rule
+		math::Vector Xk1(size);
+		math::Vector gradXk1(size);
+		double step = ArmijoBackTrack(func, fx, Xk, gradXk, Dk, Xk1, gradXk1, 1, 0.8, 0.001, 0.9);
 
-            // Step 4 matrix Hk+1
-            const auto Sk = step * Dk;
-            auto Yk = gradXk1 - gradXk;
-            const auto Yk_trans = math::Matrix::transpose(Yk);
-            const auto Sk_trans = math::Matrix::transpose(Sk);
-            double hC = 1 / (Yk_trans * Sk).to_scalar();
-            const auto new_Hk = ((I - hC * (Sk * Yk_trans).to_scalar()) * Hk * (I - hC * (Yk * Sk_trans).to_scalar()) + hC * (Sk * Sk_trans).to_scalar());
-            {
-                Hk = new_Hk;
-                Xk = Xk1;
-            }
-            i++;
-        }
-    }
+		// Step 4 matrix Hk+1
+		math::Vector Sk = step * Dk;
+		math::Vector Yk = gradXk1 - gradXk;
+		math::Matrix Sk_m = math::Matrix(Sk);
+		math::Matrix Yk_m = math::Matrix(Yk);
+		math::Matrix Sk_trans = math::Matrix::transpose(Sk);
+		math::Matrix Yk_trans = math::Matrix::transpose(Yk);
+		double hC = 1.0 / (Yk_trans * Sk).to_scalar();
+
+		Hk = (I - hC * Sk_m * Yk_trans) * Hk * (I - hC * Yk_m * Sk_trans) + hC * Sk_m * Sk_trans;
+
+		Xk = Xk1;
+	}
 }

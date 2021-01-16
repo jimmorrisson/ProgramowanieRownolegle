@@ -38,18 +38,17 @@ namespace math
         return Vector(std::move(ret));
     }
 
-    Vector operator-(const Vector &lhs, const Vector &rhs)
+    Vector operator-(const Vector& lhs)
     {
-        assert(lhs.size == rhs.size);
         Vector ret(lhs);
-        for (std::size_t i = 0; i < ret.size; i++)
+        for (std::size_t i = 0; i < ret.getSize(); i++)
         {
-            ret.at(i) -= rhs.at_r(i);
+            ret.at(i) = -lhs.at_r(i);
         }
         return Vector(std::move(ret));
     }
 
-    Vector operator+(const Vector &lhs, const Vector &rhs)
+    Vector operator+(const Vector& lhs, const Vector& rhs)
     {
         assert(lhs.size == rhs.size);
         Vector ret(lhs);
@@ -60,15 +59,15 @@ namespace math
         return Vector(std::move(ret));
     }
 
-    double operator*(const Vector &lhs, const Vector &rhs)
+    Vector operator-(const Vector &lhs, const Vector &rhs)
     {
         assert(lhs.size == rhs.size);
-        double ret = 0.0;
-        for (std::size_t i = 0; i < lhs.size; i++)
+        Vector ret(lhs);
+        for (std::size_t i = 0; i < ret.size; i++)
         {
-            ret += (lhs.at_r(i) * rhs.at_r(i));
+            ret.at(i) -= rhs.at_r(i);
         }
-        return ret;
+        return Vector(std::move(ret));
     }
 
     std::ostream &operator<<(std::ostream &out, const Vector &vec)
@@ -81,7 +80,7 @@ namespace math
 
         for (std::size_t i = 1; i < vec.size; i++)
         {
-            out << ", " << vec.at_r(i);
+            out << "; " << vec.at_r(i);
         }
 
         out << " ]" << std::endl;
