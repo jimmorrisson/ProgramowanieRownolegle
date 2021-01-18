@@ -9,11 +9,22 @@ namespace math
     class Matrix
     {
     public:
+        std::unique_ptr<std::unique_ptr<double[]>[]> arr;
         explicit Matrix(const std::size_t rows, const std::size_t cols);
         explicit Matrix(const Matrix &matrix);
         explicit Matrix(const Vector& vector);
         explicit Matrix(Matrix &&matrix);
         Matrix();
+
+        constexpr auto getRows()
+        {
+            return rows;
+        }
+
+        constexpr auto getCols()
+        {
+            return cols;
+        }
 
         static Matrix identity(const std::size_t size)
         {
@@ -83,7 +94,6 @@ namespace math
         friend std::ostream &operator<<(std::ostream &out, const Matrix &matrix);
 
     private:
-        std::unique_ptr<std::unique_ptr<double[]>[]> arr;
         std::size_t rows;
         std::size_t cols;
     };

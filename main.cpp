@@ -10,7 +10,7 @@
 #include <vector>
 #include "vector.h"
 #include "matrix.h"
-#ifdef USE_PARALLEL_PROG
+#ifdef false
 #include <mpi.h>
 #endif
 
@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
     TestUtil testUtilAlg(0.01, INT_MAX);
 
 
-#ifdef USE_PARALLEL_PROG
+#ifdef false
     int rank;
     int length;
     char name[BUFSIZ];
@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
     std::unique_ptr<IFunction> extendedRosenbrock = std::make_unique<ExtendedRosenbrockFunction>(size);
     std::unique_ptr<IFunction> quadraticFunction = std::make_unique<QuadraticFunction>(size);
     std::unique_ptr<IFunction> powellSingularFunction = std::make_unique<PowellSingularFunction>(size);
-#ifdef USE_PARALLEL_PROG
+#ifdef false
     double centroid[3]; 
 #endif
 
@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
         powellSingularFunction.get()
     };
 
-#ifdef USE_PARALLEL_PROG
+#ifdef false
     if (rank == 0)
 #endif
     {
@@ -62,13 +62,13 @@ int main(int argc, char *argv[])
         for ([[maybe_unused]] const auto function : functions)
         {
             destination++;
-#ifdef USE_PARALLEL_PROG
+#ifdef false
             MPI_Send(&centroid, 3, MPI_DOUBLE, destination, 0, MPI_COMM_WORLD);
 #else
             testUtilAlg.runTest(*function);
 #endif
         }
-#ifdef USE_PARALLEL_PROG
+#ifdef false
         MPI_Barrier(MPI_COMM_WORLD);
 #endif
         auto t2 = std::chrono::high_resolution_clock::now();
@@ -76,15 +76,15 @@ int main(int argc, char *argv[])
                   << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count()
                   << " ms" << std::endl;
     }
-#ifdef USE_PARALLEL_PROG
+#ifdef false
     else
     {
         MPI_Recv(&centroid, 3, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         testUtilAlg.runTest(*functions[rank - 1]);
         MPI_Barrier(MPI_COMM_WORLD);
     }
-
     MPI_Finalize();
+
 #endif
     return 0;
 }
