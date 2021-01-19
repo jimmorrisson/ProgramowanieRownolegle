@@ -43,9 +43,9 @@ namespace config
         MPI_Recv(&offset, 1, MPI_INT, 0, FROM_MAIN, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         MPI_Recv(&rowsNumber, 1, MPI_INT, 0, FROM_MAIN, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-        double* lhsArr = new double[lRows * lCols];
-        double* rhsArr = new double[rRows * rCols];
-        double* retArr = new double[lRows * rCols];
+        auto lhsArr = std::make_unique<double[]>(lRows * lCols);
+        auto rhsArr = std::make_unique<double[]>(rRows * rCols);
+        auto retArr = std::make_unique<double[]>(lRows * rCols);
 
         MPI_Recv(lhsArr, lRows * lCols, MPI_DOUBLE, 0, FROM_MAIN, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         MPI_Recv(rhsArr, rRows * rCols, MPI_DOUBLE, 0, FROM_MAIN, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
@@ -68,10 +68,6 @@ namespace config
         MPI_Send(&offset, 1, MPI_INT, 0, FROM_WORKER, MPI_COMM_WORLD);
         MPI_Send(&rowsNumber, 1, MPI_INT, 0, FROM_WORKER, MPI_COMM_WORLD);
         MPI_Send(&retArr[offset * rCols + 0], rowsNumber * rCols, MPI_DOUBLE, 0, FROM_WORKER, MPI_COMM_WORLD);
-
-        delete[] lhsArr;
-        delete[] rhsArr;
-        delete[] retArr;
     }
 
     void runWorkerJobCycle(int rank)
@@ -109,7 +105,7 @@ int main(int argc, char *argv[])
     {
         std::cout << "ERROR: MPI version requires at least 2 processes to run." << std::endl;
         MPI_Abort(MPI_COMM_WORLD, -1);
-        return 1;
+        return -1;
     }
 
     config::workersNumber = processesNumber - 1;
@@ -125,25 +121,22 @@ int main(int argc, char *argv[])
                 << "Program usage : \n"
                 << "./ParallelProgramming %n \n"
                 << "n - size \n";
+            return -1;
         }
-        else
-        {
 
+        TestUtil testUtilAlg(0.01, INT_MAX);
 
-            TestUtil testUtilAlg(0.01, INT_MAX);
+        char *p;
+        int size = strtol(argv[1], &p, 10);
 
-            char* p;
-            int size = strtol(argv[1], &p, 10);
+        std::unique_ptr<IFunction> extendedRosenbrock = std::make_unique<ExtendedRosenbrockFunction>(size);
+        testUtilAlg.runTest(*extendedRosenbrock.get());
 
-            std::unique_ptr<IFunction> extendedRosenbrock = std::make_unique<ExtendedRosenbrockFunction>(size);
-            testUtilAlg.runTest(*extendedRosenbrock.get());
+        std::unique_ptr<IFunction> quadraticFunction = std::make_unique<QuadraticFunction>(size);
+        testUtilAlg.runTest(*quadraticFunction.get());
 
-            std::unique_ptr<IFunction> quadraticFunction = std::make_unique<QuadraticFunction>(size);
-            testUtilAlg.runTest(*quadraticFunction.get());
-
-            std::unique_ptr<IFunction> powerSingularFunction = std::make_unique<PowellSingularFunction>(size);
-            testUtilAlg.runTest(*powerSingularFunction.get());
-        }
+        std::unique_ptr<IFunction> powerSingularFunction = std::make_unique<PowellSingularFunction>(size);
+        testUtilAlg.runTest(*powerSingularFunction.get());
 
 #ifdef USE_PARALLEL_PROG
         stopWorkerProcesses();
