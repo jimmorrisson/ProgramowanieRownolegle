@@ -3,7 +3,9 @@
 
 #ifdef USE_PARALLEL_PROG
 #include <mpi.h>
+#include "config.h"
 #endif
+#include <iostream>
 
 namespace math
 {
@@ -55,6 +57,21 @@ namespace math
                        rows{0},
                        cols{0}
     {
+    }
+
+    double* Matrix::toArray() const
+    {
+        double* ret = new double[rows * cols];
+
+        for (std::size_t row = 0; row < rows; row++)
+        {
+            for (std::size_t col = 0; col < cols; col++)
+            {
+                ret[row * cols + col] = arr[row][col];
+            }
+        }
+
+        return ret;
     }
 
     Matrix operator*(const Matrix &matrix, const double value)
@@ -124,10 +141,70 @@ namespace math
         return Matrix(std::move(ret));
     }
 
+#ifdef USE_PARALLEL_PROG
+    // MPI matrix multiplication, main process
     Matrix operator*(const Matrix &lhs, const Matrix &rhs)
     {
         assert(lhs.cols == rhs.rows);
         Matrix ret{lhs.rows, rhs.cols};
+
+        int shouldContinue = CONTINUE_RUNNING;
+        int workersNumber = config::workersNumber;
+        int averageRows = lhs.rows / workersNumber;
+        int extraRows = lhs.rows % workersNumber;
+        int rowsNumber = averageRows;
+        int offset = 0;
+
+        double* lhsArr = lhs.toArray();
+        double* rhsArr = rhs.toArray();
+        double* retArr = new double[lhs.rows * rhs.cols];
+
+        for (int dest = 1; dest <= workersNumber; dest++)
+        {
+            if (dest == workersNumber)
+            {
+                rowsNumber += extraRows;
+            }
+            MPI_Send(&shouldContinue, 1, MPI_INT, dest, FROM_MAIN, MPI_COMM_WORLD);
+            MPI_Send(&lhs.rows, 1, MPI_UNSIGNED_LONG_LONG, dest, FROM_MAIN, MPI_COMM_WORLD);
+            MPI_Send(&lhs.cols, 1, MPI_UNSIGNED_LONG_LONG, dest, FROM_MAIN, MPI_COMM_WORLD);
+            MPI_Send(&rhs.rows, 1, MPI_UNSIGNED_LONG_LONG, dest, FROM_MAIN, MPI_COMM_WORLD);
+            MPI_Send(&rhs.cols, 1, MPI_UNSIGNED_LONG_LONG, dest, FROM_MAIN, MPI_COMM_WORLD);
+            MPI_Send(&offset, 1, MPI_INT, dest, FROM_MAIN, MPI_COMM_WORLD);
+            MPI_Send(&rowsNumber, 1, MPI_INT, dest, FROM_MAIN, MPI_COMM_WORLD);
+            MPI_Send(lhsArr, lhs.rows * lhs.cols, MPI_DOUBLE, dest, FROM_MAIN, MPI_COMM_WORLD);
+            MPI_Send(rhsArr, rhs.rows * rhs.cols, MPI_DOUBLE, dest, FROM_MAIN, MPI_COMM_WORLD);
+
+            offset += rowsNumber;
+        }
+
+        for (int source = 1; source <= workersNumber; source++)
+        {
+            MPI_Recv(&offset, 1, MPI_INT, source, FROM_WORKER, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            MPI_Recv(&rowsNumber, 1, MPI_INT, source, FROM_WORKER, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            MPI_Recv(&retArr[offset * rhs.cols], rowsNumber * rhs.cols, MPI_DOUBLE, source, FROM_WORKER, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        }
+
+        for (std::size_t row = 0; row < ret.rows; row++)
+        {
+            for (std::size_t col = 0; col < ret.cols; col++)
+            {
+                ret.arr[row][col] = retArr[row * rhs.cols + col];
+            }
+        }
+
+        delete[] lhsArr;
+        delete[] rhsArr;
+        delete[] retArr;
+
+        return Matrix(std::move(ret));
+    }
+#else
+    // Sequential matrix multiplication
+    Matrix operator*(const Matrix& lhs, const Matrix& rhs)
+    {
+        assert(lhs.cols == rhs.rows);
+        Matrix ret{ lhs.rows, rhs.cols };
 
         auto getMultipliedValue = [&lhs, &rhs](const std::size_t row, const std::size_t col) {
             double val = 0.0;
@@ -148,6 +225,7 @@ namespace math
         }
         return Matrix(std::move(ret));
     }
+#endif
 
     std::ostream &operator<<(std::ostream &out, const Matrix &matrix)
     {

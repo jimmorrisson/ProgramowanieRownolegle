@@ -9,12 +9,16 @@ namespace math
     class Matrix
     {
     public:
+        static int workersNumber;
+
         std::unique_ptr<std::unique_ptr<double[]>[]> arr;
         explicit Matrix(const std::size_t rows, const std::size_t cols);
         explicit Matrix(const Matrix &matrix);
         explicit Matrix(const Vector& vector);
         explicit Matrix(Matrix &&matrix);
         Matrix();
+
+        double* toArray() const;
 
         constexpr auto getRows()
         {
